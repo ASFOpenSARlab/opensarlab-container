@@ -12,6 +12,9 @@ phases:
     - export BUILD_TAG=$(date +"%F-%H-%M-%S")
   build:
     commands:
+    - cd software
+    - sh download.sh
+    - cd ..
     - docker build -t $IMAGE_NAME .
   post_build:
     commands:
