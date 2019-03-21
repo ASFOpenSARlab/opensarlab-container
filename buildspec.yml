@@ -1,1 +1,21 @@
-# A spec for building
+version: 0.2
+
+env:
+  variables:
+    CONTAINER_REPO: 553778890976.dkr.ecr.us-east-1.amazonaws.com/asf-franz-labs
+    IMAGE_NAME: asf-franz-labs
+
+phases:
+  pre_build:
+    commands:
+    - $(aws ecr get-login --no-include-email)
+    - export BUILD_TAG=$(date +"%F-%H-%M-%S")
+  build:
+    commands:
+    - docker build -t $IMAGE_NAME .
+  post_build:
+    commands:
+    - docker tag $IMAGE_NAME:latest $CONTAINER_REPO:latest
+    - docker tag $IMAGE_NAME:latest $CONTAINER_REPO:$BUILD_TAG
+    - docker push $CONTAINER_REPO:latest
+    - docker push $CONTAINER_REPO:$BUILD_TAG
