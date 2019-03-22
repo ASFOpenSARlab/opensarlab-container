@@ -1,10 +1,5 @@
 version: 0.2
 
-env:
-  variables:
-    CONTAINER_REPO: 553778890976.dkr.ecr.us-east-1.amazonaws.com/asf-franz-labs
-    IMAGE_NAME: asf-franz-labs
-
 phases:
   pre_build:
     commands:
@@ -15,10 +10,8 @@ phases:
     - cd software
     - sh download.sh
     - cd ..
-    - docker build -t $IMAGE_NAME .
+    - docker build -t myImage .
   post_build:
     commands:
-    - docker tag $IMAGE_NAME:latest $CONTAINER_REPO:latest
-    - docker tag $IMAGE_NAME:latest $CONTAINER_REPO:$BUILD_TAG
-    - docker push $CONTAINER_REPO:latest
+    - docker tag myImage:latest $CONTAINER_REPO:$BUILD_TAG
     - docker push $CONTAINER_REPO:$BUILD_TAG
