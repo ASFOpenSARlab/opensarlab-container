@@ -6,7 +6,7 @@ phases:
     - cd software
     - sh download.sh
     - cd ..
-    - docker build --squash -t my-image:latest .
+    - docker build -t my-image:latest .
   post_build:
     commands:
     # $CONTAINER_REPO is defined in the codebuild project that runs this script
