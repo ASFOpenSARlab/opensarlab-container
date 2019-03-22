@@ -1,1 +1,16 @@
-# A spec for building
+version: 0.2
+
+phases:
+  build:
+    commands:
+    - cd software
+    - sh download.sh
+    - cd ..
+    - docker build -t my-image:latest .
+  post_build:
+    commands:
+    # $CONTAINER_REPO is defined in the codebuild project that runs this script
+    - $(aws ecr get-login --no-include-email)
+    - export BUILD_TAG=$(date +"%F-%H-%M-%S")
+    - docker tag my-image:latest $CONTAINER_REPO:$BUILD_TAG
+    - docker push $CONTAINER_REPO:$BUILD_TAG

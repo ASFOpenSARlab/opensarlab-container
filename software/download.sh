@@ -3,6 +3,7 @@
 # `bash download.sh` will use *default* for the AWS profile
 # `bash download.sh jupyterhub` will use the *jupyterhub* AWS profile
 #
+set -e
 
 if [[ "$#" == 0 ]] ; then
    profile=default
@@ -24,7 +25,7 @@ fi
 echo "Downloading MapReady..."
 if [ ! -d ASF_MapReady ] ; then
     aws s3 sync --exclude '*' --include 'ASF_MapReady_CLI.tar.gz' s3://asf-jupyter-software/ . --profile=$profile
-    tar xzvf ASF_MapReady_cli.tar.gz
+    tar xzvf ASF_MapReady_CLI.tar.gz
 fi
 
 echo "Downloading isce...."
