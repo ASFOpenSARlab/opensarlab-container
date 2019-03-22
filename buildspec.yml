@@ -10,8 +10,8 @@ phases:
     - cd software
     - sh download.sh
     - cd ..
-    - docker build -t myImage .
+    - docker build -t my-image .
   post_build:
     commands:
-    - docker tag myImage:latest $CONTAINER_REPO:$BUILD_TAG
+    - docker tag my-image:latest $CONTAINER_REPO:$BUILD_TAG
     - docker push $CONTAINER_REPO:$BUILD_TAG
