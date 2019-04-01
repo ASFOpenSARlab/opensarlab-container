@@ -146,7 +146,7 @@ RUN pip2 install 'scipy==0.18.1' 'matplotlib==1.4.3' 'pykml'
 
 COPY software/GIAnT/ /usr/local/GIAnT/
 RUN cd /usr/local/GIAnT/ && python2.7 setup.py build_ext
-ENV PYTHONPATH $PYTHONPATH:/usr/local/GIAnT:/usr/local/GIANT/SCR:/usr/local/GIAnT/tsinsar:/usr/local/GIAnT/examples:/usr/local/GIAnT/geocode:/usr/local/GIAnT/solver
+ENV PYTHONPATH $PYTHONPATH:/usr/local/GIAnT:/usr/local/GIAnT/SCR:/usr/local/GIAnT/tsinsar:/usr/local/GIAnT/examples:/usr/local/GIAnT/geocode:/usr/local/GIAnT/solver
 
 COPY software/prepdataxml.py /usr/local/GIAnT/prepdataxml.py
 
