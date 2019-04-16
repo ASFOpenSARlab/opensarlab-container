@@ -34,7 +34,8 @@ RUN apt update && \
     awscli \
     vim \
     rsync \
-    less
+    less \
+    snaphu
 
 RUN pip install 'boto3>=1.4.4' 'pyyaml>=3.12' 'pandas==0.23.0' 'bokeh' 'matplotlib' 'tensorflow==1.13.1' 'keras'
 
