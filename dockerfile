@@ -83,7 +83,7 @@ RUN apt update && \
     libfftw3-dev \
     curl
 
-RUN pip install 'numpy>=1.13.0' 'h5py' 'gdal' 'scipy'
+RUN pip install 'numpy>=1.13.0' 'h5py' 'gdal==2.4.0' 'scipy'
 
 ENV ISCE_HOME /usr/local/isce
 ENV PYTHONPATH $PYTHONPATH:/usr/local/
@@ -150,6 +150,28 @@ RUN cd /usr/local/GIAnT/ && python2.7 setup.py build_ext
 ENV PYTHONPATH $PYTHONPATH:/usr/local/GIAnT:/usr/local/GIAnT/SCR:/usr/local/GIAnT/tsinsar:/usr/local/GIAnT/examples:/usr/local/GIAnT/geocode:/usr/local/GIAnT/solver
 
 COPY software/prepdataxml.py /usr/local/GIAnT/prepdataxml.py
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Install hyp3-lib (which only runs in python2)
+# Prereq for TRAIN
+# Only copy what is needed. Other unused libs might have prerequisites which might bloat things
+RUN pip2 install 'numpy' 'gdal==2.4.0' 'boto3'
+
+COPY software/hyp3-lib/src/execute.py /usr/local/hyp3-lib/src/execute.py
+COPY software/hyp3-lib/src/saa_func_lib.py /usr/local/hyp3-lib/src/saa_func_lib.py
+COPY software/hyp3-lib/src/get_dem.py /usr/local/hyp3-lib/src/get_dem.py
+COPY software/hyp3-lib/src/dem2isce.py /usr/local/hyp3-lib/src/dem2isce.py
+
+ENV PYTHONPATH $PYTHONPATH:/usr/local/hyp3-lib/src
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Install TRAIN (which only runs in python2)
+RUN pip2 install 'numpy' 'netCDF4' 'scipy==0.18.1' 'gdal==2.4.0'
+
+COPY software/TRAIN/ /usr/local/TRAIN/
+ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
 
 
 # ---------------------------------------------------------------------------------------------------------------
