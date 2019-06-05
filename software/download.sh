@@ -42,7 +42,7 @@ fi
 
 echo "Downloading hyp3-lib"
 if [ ! -d hyp3-lib ] ; then
-    git clone -b prod --single-branch https://github.com/asfadmin/hyp3-lib.git
+    git clone -b test --single-branch https://github.com/asfadmin/hyp3-lib.git
 fi
 
 echo "Downloading snap..."

@@ -1,2 +1,3 @@
 software/*
 !software/download.sh
+!software/get_dem.py.cfg
