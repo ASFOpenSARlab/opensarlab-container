@@ -34,6 +34,17 @@ if [ ! -d isce ] ; then
     unzip isce.zip
 fi
 
+echo "Downloading TRAIN..."
+if [ ! -d TRAIN ] ; then
+    git clone -b test --single-branch https://github.com/asfadmin/hyp3-TRAIN.git
+    mv hyp3-TRAIN TRAIN
+fi
+
+echo "Downloading hyp3-lib"
+if [ ! -d hyp3-lib ] ; then
+    git clone -b test --single-branch https://github.com/asfadmin/hyp3-lib.git
+fi
+
 echo "Downloading snap..."
 aws s3 sync --exclude '*' --include 'esa-snap_sentinel_unix_5_0.sh' s3://asf-jupyter-software/ . --profile=$profile
 
