@@ -175,13 +175,20 @@ ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
 # ---------------------------------------------------------------------------------------------------------------
 # Install any other custom and jupyter libaries
 # Use pip (conda version) since we want to corner off GIAnT's work and also run it with Jupyter
-RUN pip install nbgitpuller asf-hyp3
+RUN pip install nbgitpuller asf-hyp3 jupyter_contrib_nbextensions
 
 # Get the git puller activated
 RUN jupyter serverextension enable --py nbgitpuller --sys-prefix
 
+# Install JavaScript and CSS for extensions
+RUN jupyter contrib nbextension install --system
+# Disable extension GUI in menu.
+RUN jupyter nbextensions_configurator disable --system
+# Enable specific extensions
+RUN jupyter nbextension enable hide_input/main
+RUN jupyter nbextension enable freeze/main
 
-
+# Remove apt list to save a little room (though it probably doesn't matter as much since the image is already really big)
 RUN rm -rf /var/lib/apt/lists/*
 
 USER jovyan
