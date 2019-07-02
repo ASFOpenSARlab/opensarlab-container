@@ -24,8 +24,8 @@ fi
 
 echo "Downloading MapReady..."
 if [ ! -d ASF_MapReady ] ; then
-    aws s3 sync --exclude '*' --include 'ASF_MapReady_CLI.tar.gz' s3://asf-jupyter-software/ . --profile=$profile
-    tar xzvf ASF_MapReady_CLI.tar.gz
+    aws s3 sync --exclude '*' --include 'mapready-u18.zip' s3://asf-jupyter-software/ . --profile=$profile
+    unzip mapready-u18.zip
 fi
 
 echo "Downloading isce...."
