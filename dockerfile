@@ -45,31 +45,33 @@ RUN pip install 'boto3>=1.4.4' 'pyyaml>=3.12' 'pandas==0.23.0' 'bokeh' 'matplotl
 RUN apt update && \
     apt install --no-install-recommends -y \
     pkg-config \
-    libxml2-dev \
-    libgsl-dev \
-    libpng-dev \
+    gcc \
+    g++ \
     bison \
     flex \
-    gcc \
-    libtiff-dev \
-    libgeotiff-dev \
-    libhdf5-dev \
-    libglib2.0-dev \
+    libcunit1-dev \
+    libexif-dev \
+    libfftw3-dev \
     libgdal-dev \
-    libshp-dev
+    libgeotiff-dev \
+    libglade2-dev \
+    libglib2.0-dev \
+    libgsl-dev \
+    libgtk2.0-dev \
+    libjpeg-dev \
+    libpng-dev \
+    libproj-dev \
+    libproj12 \
+    libshp-dev \
+    libtiff5-dev \
+    libxml2-dev \
+    libhdf5-dev
 
-COPY software/ASF_MapReady /tmp/ASF_MapReady
-RUN cd /tmp/ASF_MapReady && make install && rm -rf /tmp/ASF_MapReady*
-
-# It's assumed that the compiled versions of previous libaries will have the same behavior
-RUN cp /usr/lib/x86_64-linux-gnu/libgsl.so /usr/lib/x86_64-linux-gnu/libgsl.so.19
-RUN cp /usr/lib/x86_64-linux-gnu/libproj.so /usr/lib/x86_64-linux-gnu/libproj.so.9
-RUN cp /usr/lib/x86_64-linux-gnu/libhdf5_serial.so /usr/lib/x86_64-linux-gnu/libhdf5_serial.so.10
-RUN cp /usr/lib/x86_64-linux-gnu/libnetcdf.so /usr/lib/x86_64-linux-gnu/libnetcdf.so.11
-
-RUN wget -q -O /tmp/libpng12.deb http://mirrors.kernel.org/ubuntu/pool/main/libp/libpng/libpng12-0_1.2.54-1ubuntu1_amd64.deb \
-    && dpkg -i /tmp/libpng12.deb \
-    && rm /tmp/libpng12.deb
+COPY software/mapready-build/bin/* /usr/local/bin/
+COPY software/mapready-build/doc/* /usr/local/doc/
+COPY software/mapready-build/lib/* /usr/local/lib/
+COPY software/mapready-build/man/* /usr/local/man/
+COPY software/mapready-build/share/* /usr/local/share/
 
 
 # ---------------------------------------------------------------------------------------------------------------
