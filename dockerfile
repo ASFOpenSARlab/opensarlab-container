@@ -37,7 +37,7 @@ RUN apt update && \
     less \
     snaphu
 
-RUN pip install 'boto3>=1.4.4' 'pyyaml>=3.12' 'pandas==0.23.0' 'bokeh' 'matplotlib' 'tensorflow==1.13.1' 'keras'
+RUN pip install 'boto3>=1.4.4' 'pyyaml>=3.12' 'pandas==0.23.0' 'bokeh' 'matplotlib' 'tensorflow==1.13.1' 'keras' 'plotly' 'rasterio'
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -175,12 +175,15 @@ ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
 
 
 # ---------------------------------------------------------------------------------------------------------------
-# Install any other custom and jupyter libaries
+# Install any other custom and jupyter libaries like widgets
 # Use pip (conda version) since we want to corner off GIAnT's work and also run it with Jupyter
-RUN pip install nbgitpuller asf-hyp3 jupyter_contrib_nbextensions
+RUN pip install nbgitpuller asf-hyp3 jupyter_contrib_nbextensions ipywidgets mpldatacursor
 
-# Get the git puller activated
+# Activate git puller so users get the latest notebooks
 RUN jupyter serverextension enable --py nbgitpuller --sys-prefix
+
+# Enable jupyter widgets
+RUN jupyter nbextension enable --py widgetsnbextension
 
 # Install JavaScript and CSS for extensions
 RUN jupyter contrib nbextension install --system
