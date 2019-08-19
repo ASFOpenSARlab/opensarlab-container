@@ -36,7 +36,7 @@ RUN apt update && \
     less \
     snaphu
 
-RUN pip install 'awscli' 'boto3>=1.4.4' 'pyyaml>=3.12' 'pandas==0.23.0' 'bokeh' 'matplotlib' 'tensorflow==1.13.1' 'keras' 'plotly' 'rasterio'
+RUN pip install 'awscli' 'boto3>=1.4.4' 'pyyaml>=3.12' 'pandas==0.23.0' 'bokeh' 'matplotlib' 'tensorflow==1.13.1' 'keras' 'plotly' 'rasterio' 'pyproj'
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -176,7 +176,7 @@ ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
 # ---------------------------------------------------------------------------------------------------------------
 # Install any other custom and jupyter libaries like widgets
 # Use pip (conda version) since we want to corner off GIAnT's work and also run it with Jupyter
-RUN pip install nbgitpuller asf-hyp3 jupyter_contrib_nbextensions ipywidgets mpldatacursor
+RUN pip install nbgitpuller asf-hyp3 jupyter_contrib_nbextensions ipywidgets mpldatacursor nbserverproxy
 
 # Activate git puller so users get the latest notebooks
 RUN jupyter serverextension enable --py nbgitpuller --sys-prefix
@@ -191,6 +191,10 @@ RUN jupyter nbextensions_configurator disable --system
 # Enable specific extensions
 RUN jupyter nbextension enable hide_input/main
 RUN jupyter nbextension enable freeze/main
+
+# Install and enable bokeh extensions. THe nbserver is needed for the extensions to work properly due to Jupyter limitations.
+RUN jupyter labextension install jupyterlab_bokeh
+RUN jupyter serverextension enable --py nbserverproxy
 
 # Remove apt list to save a little room (though it probably doesn't matter as much since the image is already really big)
 RUN rm -rf /var/lib/apt/lists/*
