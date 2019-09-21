@@ -125,8 +125,6 @@ RUN apt install -y build-essential \
     cython \
     ipython \
     python-pip \
-    python-numpy \
-    python-scipy \
     python-numexpr \
     python-setuptools \
     python-distutils-extra \
@@ -144,7 +142,7 @@ RUN apt install -y build-essential \
     python-netcdf4 \
     python-pyresample
 
-RUN pip2 install 'scipy==0.18.1' 'matplotlib==1.4.3' 'pykml'
+RUN pip2 install 'scipy==0.18.1' 'matplotlib==1.4.3' 'pykml' 'numpy<=1.9.0'
 
 COPY software/GIAnT/ /usr/local/GIAnT/
 RUN cd /usr/local/GIAnT/ && python2.7 setup.py build_ext
