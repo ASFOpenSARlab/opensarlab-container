@@ -165,7 +165,7 @@ ENV PYTHONPATH $PYTHONPATH:/usr/local/hyp3-lib/src
 
 # ---------------------------------------------------------------------------------------------------------------
 # Install TRAIN (which only runs in python2)
-RUN pip2 install 'numpy' 'netCDF4' 'scipy==0.18.1' 'gdal==2.4.0'
+RUN pip2 install 'numpy<=1.9.0' 'netCDF4' 'scipy==0.18.1' 'gdal==2.4.0'
 
 COPY software/TRAIN/ /usr/local/TRAIN/
 ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
