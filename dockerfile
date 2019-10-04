@@ -125,6 +125,8 @@ RUN apt install -y build-essential \
     cython \
     ipython \
     python-pip \
+    python-numpy \
+    python-scipy \
     python-numexpr \
     python-setuptools \
     python-distutils-extra \
@@ -142,7 +144,7 @@ RUN apt install -y build-essential \
     python-netcdf4 \
     python-pyresample
 
-RUN pip2 install 'scipy==0.18.1' 'matplotlib==1.4.3' 'pykml' 'numpy<=1.9.0'
+RUN pip2 install 'scipy==0.18.1' 'matplotlib==1.4.3' 'pykml'
 
 COPY software/GIAnT/ /usr/local/GIAnT/
 RUN cd /usr/local/GIAnT/ && python2.7 setup.py build_ext
@@ -155,7 +157,7 @@ COPY software/prepdataxml.py /usr/local/GIAnT/prepdataxml.py
 # Install hyp3-lib (which only runs in python2)
 # Prereq for TRAIN
 # Only copy what is needed. Other unused libs might have prerequisites which might bloat things
-RUN pip2 install 'numpy<=1.9.0' 'gdal==2.4.0' 'boto3' 'lxml' 'requests' 'Pillow'
+RUN pip2 install 'numpy' 'gdal==2.4.0' 'boto3' 'lxml' 'requests' 'Pillow'
 
 COPY software/hyp3-lib /usr/local/hyp3-lib
 COPY software/get_dem.py.cfg /usr/local/hyp3-lib/config/get_dem.py.cfg
@@ -165,7 +167,7 @@ ENV PYTHONPATH $PYTHONPATH:/usr/local/hyp3-lib/src
 
 # ---------------------------------------------------------------------------------------------------------------
 # Install TRAIN (which only runs in python2)
-RUN pip2 install 'numpy<=1.9.0' 'netCDF4' 'scipy==0.18.1' 'gdal==2.4.0'
+RUN pip2 install 'numpy' 'netCDF4' 'scipy==0.18.1' 'gdal==2.4.0'
 
 COPY software/TRAIN/ /usr/local/TRAIN/
 ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
