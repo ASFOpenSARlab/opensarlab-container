@@ -46,7 +46,9 @@ if [ ! -d hyp3-lib ] ; then
 fi
 
 echo "Downloading snap..."
-aws s3 sync --exclude '*' --include 'esa-snap_sentinel_unix_5_0.sh' s3://asf-jupyter-software/ . --profile=$profile
+aws s3 sync --exclude '*' --include 'esa-snap_sentinel_unix_7_0.sh' s3://asf-jupyter-software/ . --profile=$profile
+
+aws s3 sync --exclude '*' --include 'snap_install_7_0.varfile' s3://asf-jupyter-software/ . --profile=$profile
 
 echo "Downloading other files...."
 aws s3 sync --exclude '*' --include 'focus.py' s3://asf-jupyter-software/ . --profile=$profile
@@ -56,7 +58,5 @@ aws s3 sync --exclude '*' --include 'prepdataxml.py' s3://asf-jupyter-software/ 
 aws s3 sync --exclude '*' --include 'topo.py' s3://asf-jupyter-software/ . --profile=$profile
 
 aws s3 sync --exclude '*' --include 'unpackFrame_ALOS_raw.py' s3://asf-jupyter-software/ . --profile=$profile
-
-aws s3 sync --exclude '*' --include 'snap_install.varfile' s3://asf-jupyter-software/ . --profile=$profile
 
 aws s3 sync --exclude '*' --include 'gpt.vmoptions' s3://asf-jupyter-software/ . --profile=$profile
