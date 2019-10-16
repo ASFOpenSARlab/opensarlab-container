@@ -102,20 +102,26 @@ RUN chmod 755 $ISCE_HOME/applications/*
 
 # ---------------------------------------------------------------------------------------------------------------
 # Install SNAP 7.0 and snappy
+RUN apt update && \
+    apt install --no-install-recommends -y \
+    default-jdk-headless \
+    maven
+
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
+ENV PATH $PATH:/usr/lib/jvm/java-11-openjdk-amd64/bin
+
 COPY software/esa-snap_sentinel_unix_7_0.sh /usr/local/etc/esa-snap_sentinel_unix_7_0.sh
 COPY software/snap_install_7_0.varfile /usr/local/etc/snap_install_7_0.varfile
 RUN sh /usr/local/etc/esa-snap_sentinel_unix_7_0.sh -q -varfile /usr/local/etc/snap_install_7_0.varfile
 COPY software/gpt.vmoptions /usr/local/snap/bin/gpt.vmoptions
 RUN rm /usr/local/etc/esa-snap_sentinel_unix_7_0.sh
 
-#ENV PATH $PATH:/usr/local/snap/jre/bin
-#ENV JAVA_HOME /usr/local/snap/jre
-
 #RUN git clone https://github.com/bcdev/jpy.git /home/jovyan/jpy
 #RUN python /home/jovyan/setup.py bdist_wheel
 #RUN cp dist/*.whl "/home/jovyan/.snap/snap-python/snappy"
 
-#RUN /usr/local/snap/bin/snappy-conf /opt/conda/bin/python ~/.snap/snap-python
+RUN /usr/local/snap/bin/snappy-conf /usr/bin/python2 /usr/local/lib/python2.7/site-packages
+#RUN /usr/local/snap/bin/snappy-conf /opt/conda/bin/python /opt/conda/lib/python3.7/site-packages
 
 # ---------------------------------------------------------------------------------------------------------------
 # Install GIAnT (which only runs in python 2)
