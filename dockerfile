@@ -116,17 +116,24 @@ RUN sh /usr/local/etc/esa-snap_sentinel_unix_7_0.sh -q -varfile /usr/local/etc/s
 COPY software/gpt.vmoptions /usr/local/snap/bin/gpt.vmoptions
 RUN rm /usr/local/etc/esa-snap_sentinel_unix_7_0.sh
 
-#RUN git clone https://github.com/bcdev/jpy.git /home/jovyan/jpy
-#RUN python /home/jovyan/setup.py bdist_wheel
-#RUN cp dist/*.whl "/home/jovyan/.snap/snap-python/snappy"
+RUN git clone https://github.com/bcdev/jpy.git /usr/local/jpy
+WORKDIR /usr/local/jpy
+RUN python setup.py install
+RUN python setup.py bdist_wheel
+WORKDIR /
 
-RUN /usr/local/snap/bin/snappy-conf /usr/bin/python2 /usr/local/lib/python2.7/site-packages
-#RUN /usr/local/snap/bin/snappy-conf /opt/conda/bin/python /opt/conda/lib/python3.7/site-packages
+RUN mkdir -p /tmp/snappy/snap
+RUN cp /usr/local/jpy/dist/*.whl /tmp/snappy
+RUN /usr/local/snap/bin/snappy-conf /opt/conda/bin/python3.7 /tmp
+RUN cd /tmp/snappy && python setup.py install && cd /
+RUN rm -rf /tmp/snappy /tmp/build
 
 # ---------------------------------------------------------------------------------------------------------------
 # Install GIAnT (which only runs in python 2)
 # Some of these might not be needed but the thing works.
-RUN apt install -y build-essential \
+RUN apt update && \
+    apt install --no-install-recommends -y \
+    build-essential \
     gfortran \
     zlibc \
     zlib1g-dev \
@@ -212,5 +219,8 @@ RUN jupyter serverextension enable --py nbserverproxy
 
 # Remove apt list to save a little room (though it probably doesn't matter as much since the image is already really big)
 RUN rm -rf /var/lib/apt/lists/*
+
+# Make sure that any files in the home directory are jovyan permission
+RUN chown -R jovyan:users /home/jovyan/
 
 USER jovyan
