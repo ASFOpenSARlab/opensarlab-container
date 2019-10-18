@@ -225,4 +225,7 @@ RUN rm -rf /var/lib/apt/lists/*
 # Make sure that any files in the home directory are jovyan permission
 RUN chown -R jovyan:users /home/jovyan/
 
+# Remove over 1 GB of latex files to save space
+RUN apt remove -y texlive*
+
 USER jovyan
