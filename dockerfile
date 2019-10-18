@@ -66,12 +66,15 @@ RUN apt update && \
     libxml2-dev \
     libhdf5-dev
 
-COPY software/mapready-build/bin/* /usr/local/bin/
-COPY software/mapready-build/doc/* /usr/local/doc/
-COPY software/mapready-build/lib/* /usr/local/lib/
-COPY software/mapready-build/man/* /usr/local/man/
-COPY software/mapready-build/share/* /usr/local/share/
+ENV MAPREADY_HOME /usr/local/mapready/
 
+COPY software/mapready-build/bin/* $MAPREADY_HOME/bin/
+COPY software/mapready-build/doc/* $MAPREADY_HOME/doc/
+COPY software/mapready-build/lib/* $MAPREADY_HOME/lib/
+COPY software/mapready-build/man/* $MAPREADY_HOME/man/
+COPY software/mapready-build/share/* $MAPREADY_HOME/share/
+
+ENV PATH $PATH:$MAPREADY_HOME/bin/:$MAPREADY_HOME/lib/:$MAPREADY_HOME/share/
 
 # ---------------------------------------------------------------------------------------------------------------
 # Install ISCE.
@@ -86,8 +89,8 @@ RUN apt update && \
 
 RUN pip install 'numpy>=1.13.0' 'h5py' 'gdal==2.4.0' 'scipy'
 
-ENV ISCE_HOME /usr/local/isce
-ENV PYTHONPATH $PYTHONPATH:/usr/local/
+ENV ISCE_HOME /usr/local/isce/isce
+ENV PYTHONPATH $PYTHONPATH:/usr/local/isce/
 ENV PATH $PATH:$ISCE_HOME/bin:$ISCE_HOME/applications
 
 COPY software/isce $ISCE_HOME
@@ -110,23 +113,22 @@ RUN apt update && \
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 ENV PATH $PATH:/usr/lib/jvm/java-11-openjdk-amd64/bin
 
-COPY software/esa-snap_sentinel_unix_7_0.sh /usr/local/etc/esa-snap_sentinel_unix_7_0.sh
-COPY software/snap_install_7_0.varfile /usr/local/etc/snap_install_7_0.varfile
-RUN sh /usr/local/etc/esa-snap_sentinel_unix_7_0.sh -q -varfile /usr/local/etc/snap_install_7_0.varfile
+RUN mkdir -p /tmp/build/snappy
+COPY software/esa-snap_sentinel_unix_7_0.sh /tmp/build/snappy/esa-snap_sentinel_unix_7_0.sh
+COPY software/snap_install_7_0.varfile /tmp/build/snappy/snap_install_7_0.varfile
+
+# The build script will create a /usr/local/snap directory
+RUN sh /tmp/build/snappy/esa-snap_sentinel_unix_7_0.sh -q -varfile /tmp/build/snappy/snap_install_7_0.varfile
+
 COPY software/gpt.vmoptions /usr/local/snap/bin/gpt.vmoptions
-RUN rm /usr/local/etc/esa-snap_sentinel_unix_7_0.sh
 
-RUN git clone https://github.com/bcdev/jpy.git /usr/local/jpy
-WORKDIR /usr/local/jpy
-RUN python setup.py install
-RUN python setup.py bdist_wheel
-WORKDIR /
-
-RUN mkdir -p /tmp/snappy/snap
-RUN cp /usr/local/jpy/dist/*.whl /tmp/snappy
-RUN /usr/local/snap/bin/snappy-conf /opt/conda/bin/python3.7 /tmp
-RUN cd /tmp/snappy && python setup.py install && cd /
-RUN rm -rf /tmp/snappy /tmp/build
+RUN git clone https://github.com/bcdev/jpy.git /tmp/build/jpy
+RUN cd /tmp/build/jpy && python setup.py install && cd /
+RUN cd /tmp/build/jpy && python setup.py bdist_wheel && cd /
+RUN cp /tmp/build/jpy/dist/*.whl /tmp/build/snappy
+RUN /usr/local/snap/bin/snappy-conf /opt/conda/bin/python3.7 /tmp/build/
+RUN cd /tmp/build/snappy && python setup.py install && cd /
+RUN rm -rf /tmp/build/
 
 # ---------------------------------------------------------------------------------------------------------------
 # Install GIAnT (which only runs in python 2)
@@ -168,7 +170,7 @@ RUN apt update && \
 RUN pip2 install 'scipy==0.18.1' 'matplotlib==1.4.3' 'pykml'
 
 COPY software/GIAnT/ /usr/local/GIAnT/
-RUN cd /usr/local/GIAnT/ && python2.7 setup.py build_ext
+RUN cd /usr/local/GIAnT/ && python2.7 setup.py build_ext && cd /
 ENV PYTHONPATH $PYTHONPATH:/usr/local/GIAnT:/usr/local/GIAnT/SCR:/usr/local/GIAnT/tsinsar:/usr/local/GIAnT/examples:/usr/local/GIAnT/geocode:/usr/local/GIAnT/solver
 
 COPY software/prepdataxml.py /usr/local/GIAnT/prepdataxml.py
