@@ -104,30 +104,22 @@ RUN chmod 755 $ISCE_HOME/applications/*
 
 
 # ---------------------------------------------------------------------------------------------------------------
-# Install SNAP 7.0 and snappy
+# Install SNAP 7.0
 RUN apt update && \
     apt install --no-install-recommends -y \
-    default-jdk-headless \
-    maven
+    default-jdk-headless
 
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 ENV PATH $PATH:/usr/lib/jvm/java-11-openjdk-amd64/bin
 
-RUN mkdir -p /tmp/build/snappy
-COPY software/esa-snap_sentinel_unix_7_0.sh /tmp/build/snappy/esa-snap_sentinel_unix_7_0.sh
-COPY software/snap_install_7_0.varfile /tmp/build/snappy/snap_install_7_0.varfile
+RUN mkdir -p /tmp/build/snap
+COPY software/esa-snap_sentinel_unix_7_0.sh /tmp/build/snap/esa-snap_sentinel_unix_7_0.sh
+COPY software/snap_install_7_0.varfile /tmp/build/snap/snap_install_7_0.varfile
 
 # The build script will create a /usr/local/snap directory
-RUN sh /tmp/build/snappy/esa-snap_sentinel_unix_7_0.sh -q -varfile /tmp/build/snappy/snap_install_7_0.varfile
-
+RUN sh /tmp/build/snap/esa-snap_sentinel_unix_7_0.sh -q -varfile /tmp/build/snap/snap_install_7_0.varfile
 COPY software/gpt.vmoptions /usr/local/snap/bin/gpt.vmoptions
 
-RUN git clone https://github.com/bcdev/jpy.git /tmp/build/jpy
-RUN cd /tmp/build/jpy && python setup.py install && cd /
-RUN cd /tmp/build/jpy && python setup.py bdist_wheel && cd /
-RUN cp /tmp/build/jpy/dist/*.whl /tmp/build/snappy
-RUN /usr/local/snap/bin/snappy-conf /opt/conda/bin/python3.7 /tmp/build/
-RUN cd /tmp/build/snappy && python setup.py install && cd /
 RUN rm -rf /tmp/build/
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -226,6 +218,6 @@ RUN rm -rf /var/lib/apt/lists/*
 RUN chown -R jovyan:users /home/jovyan/
 
 # Remove over 1 GB of latex files to save space
-RUN apt remove -y texlive*
+#RUN apt remove -y texlive*
 
 USER jovyan
