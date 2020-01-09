@@ -87,7 +87,7 @@ RUN apt update && \
     libfftw3-dev \
     curl
 
-RUN pip install 'numpy>=1.13.0' 'h5py' 'gdal==2.4.0' 'scipy'
+RUN pip install 'numpy>=1.13.0' 'h5py' 'gdal==3.0.2' 'scipy'
 
 ENV ISCE_HOME /usr/local/isce/isce
 ENV PYTHONPATH $PYTHONPATH:/usr/local/isce/
@@ -151,7 +151,6 @@ RUN apt update && \
     python-mpltoolkits.basemap \
     python-lxml \
     python-requests \
-    python-gdal \
     python-pyshp \
     python-shapely \
     python-pywt \
@@ -159,7 +158,7 @@ RUN apt update && \
     python-netcdf4 \
     python-pyresample
 
-RUN pip2 install 'scipy==0.18.1' 'matplotlib==1.4.3' 'pykml'
+RUN pip2 install 'scipy==0.18.1' 'matplotlib==1.4.3' 'pykml' 'gdal==3.0.2'
 
 COPY software/GIAnT/ /usr/local/GIAnT/
 RUN cd /usr/local/GIAnT/ && python2.7 setup.py build_ext && cd /
@@ -172,7 +171,7 @@ COPY software/prepdataxml.py /usr/local/GIAnT/prepdataxml.py
 # Install hyp3-lib (which only runs in python2)
 # Prereq for TRAIN
 # Only copy what is needed. Other unused libs might have prerequisites which might bloat things
-RUN pip2 install 'numpy' 'gdal==2.4.0' 'boto3' 'lxml' 'requests' 'Pillow'
+RUN pip2 install 'numpy' 'gdal==3.0.2' 'boto3' 'lxml' 'requests' 'Pillow'
 
 COPY software/hyp3-lib /usr/local/hyp3-lib
 COPY software/get_dem.py.cfg /usr/local/hyp3-lib/config/get_dem.py.cfg
@@ -182,7 +181,7 @@ ENV PYTHONPATH $PYTHONPATH:/usr/local/hyp3-lib/src
 
 # ---------------------------------------------------------------------------------------------------------------
 # Install TRAIN (which only runs in python2)
-RUN pip2 install 'numpy' 'netCDF4' 'scipy==0.18.1' 'gdal==2.4.0'
+RUN pip2 install 'numpy' 'netCDF4' 'scipy==0.18.1' 'gdal==3.0.2'
 
 COPY software/TRAIN/ /usr/local/TRAIN/
 ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
@@ -219,5 +218,8 @@ RUN chown -R jovyan:users /home/jovyan/
 
 # Remove over 1 GB of latex files to save space
 #RUN apt remove -y texlive*
+
+# Remove unneeded packages to free up a few hundred MB
+RUN apt autoremove -y
 
 USER jovyan
