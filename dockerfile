@@ -217,7 +217,10 @@ RUN rm -rf /var/lib/apt/lists/*
 RUN chown -R jovyan:users /home/jovyan/
 
 # Remove over 1 GB of latex files to save space
-#RUN apt remove -y texlive*
+RUN apt remove -y texlive*
+# Remove 'LaTeX' options and all custom exporters in download menu
+RUN sed -i '/LaTeX/d' /opt/conda/lib/python3.7/site-packages/notebook/templates/notebook.html
+RUN sed -i '/exporter\.display/d' /opt/conda/lib/python3.7/site-packages/notebook/templates/notebook.html
 
 # Remove unneeded packages to free up a few hundred MB
 RUN apt autoremove -y
