@@ -36,13 +36,22 @@ fi
 
 echo "Downloading TRAIN..."
 if [ ! -d TRAIN ] ; then
-    git clone -b test --single-branch https://github.com/asfadmin/hyp3-TRAIN.git
-    mv hyp3-TRAIN TRAIN
+    git clone -b test --single-branch https://github.com/asfadmin/hyp3-TRAIN.git TRAIN
 fi
 
 echo "Downloading hyp3-lib"
 if [ ! -d hyp3-lib ] ; then
     git clone -b test --single-branch https://github.com/asfadmin/hyp3-lib.git
+fi
+
+echo "Downloading MintPy"
+if [ ! -d MintPy ] ; then
+    git clone -b master --single-branch https://github.com/insarlab/MintPy.git
+fi
+
+echo "Downloading PyAPS"
+if [ ! -d PyAPS ] ; then
+    git clone -b master --single-branch https://github.com/yunjunz/pyaps3.git PyAPS
 fi
 
 echo "Downloading snap..."

@@ -188,41 +188,55 @@ ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
 
 
 # ---------------------------------------------------------------------------------------------------------------
+# Install MintPy
+
+# Pull and config mintpy and pyaps
+COPY software/MintPy /usr/local/MintPy
+COPY software/PyAPS /usr/local/PyAPS
+
+RUN pip install 'cdsapi' 'cvxopt' 'dask[complete]>=1.0,<2.0' 'dask-jobqueue>=0.3,<1.0' \
+    'h5py' 'lxml' 'matplotlib' 'netcdf4' 'numpy' 'pyproj' 'pykdtree' \
+    'pyresample' 'scikit-image' 'scipy' && \
+    pip install https://github.com/matplotlib/basemap/archive/master.zip  && \
+    pip install pykml -e git+https://github.com/yunjunz/pykml.git#egg=pykml
+
+ENV MINTPY_HOME=/usr/local/MintPy
+ENV PYAPS_HOME=/usr/local/PyAPS
+ENV PATH=${PATH}:${MINTPY_HOME}/mintpy:${MINTPY_HOME}/sh
+ENV PYTHONPATH=${PYTHONPATH}:${MINTPY_HOME}:${PYAPS_HOME}
+ENV PROJ_LIB=/usr/share/proj
+
+# ---------------------------------------------------------------------------------------------------------------
 # Install any other custom and jupyter libaries like widgets
 # Use pip (conda version) since we want to corner off GIAnT's work and also run it with Jupyter
 RUN pip install nbgitpuller asf-hyp3 jupyter_contrib_nbextensions ipywidgets mpldatacursor nbserverproxy
 
 # Activate git puller so users get the latest notebooks
-RUN jupyter serverextension enable --py nbgitpuller --sys-prefix
-
 # Enable jupyter widgets
-RUN jupyter nbextension enable --py widgetsnbextension
-
 # Install JavaScript and CSS for extensions
-RUN jupyter contrib nbextension install --system
 # Disable extension GUI in menu.
-RUN jupyter nbextensions_configurator disable --system
 # Enable specific extensions
-RUN jupyter nbextension enable hide_input/main
-RUN jupyter nbextension enable freeze/main
-
 # Install and enable bokeh extensions. THe nbserver is needed for the extensions to work properly due to Jupyter limitations.
-RUN jupyter labextension install jupyterlab_bokeh
-RUN jupyter serverextension enable --py nbserverproxy
-
-# Remove apt list to save a little room (though it probably doesn't matter as much since the image is already really big)
-RUN rm -rf /var/lib/apt/lists/*
-
-# Make sure that any files in the home directory are jovyan permission
-RUN chown -R jovyan:users /home/jovyan/
+RUN jupyter serverextension enable --py nbgitpuller --sys-prefix && \
+    jupyter nbextension enable --py widgetsnbextension && \
+    jupyter contrib nbextension install --system && \
+    jupyter nbextensions_configurator disable --system && \
+    jupyter nbextension enable hide_input/main && \
+    jupyter nbextension enable freeze/main && \
+    jupyter labextension install jupyterlab_bokeh && \
+    jupyter serverextension enable --py nbserverproxy
 
 # Remove over 1 GB of latex files to save space
 RUN apt remove -y texlive*
 # Remove 'LaTeX' options and all custom exporters in download menu
-RUN sed -i '/LaTeX/d' /opt/conda/lib/python3.7/site-packages/notebook/templates/notebook.html
-RUN sed -i '/exporter\.display/d' /opt/conda/lib/python3.7/site-packages/notebook/templates/notebook.html
+RUN sed -i '/LaTeX/d' /opt/conda/lib/python3.7/site-packages/notebook/templates/notebook.html && \
+    sed -i '/exporter\.display/d' /opt/conda/lib/python3.7/site-packages/notebook/templates/notebook.html
 
 # Remove unneeded packages to free up a few hundred MB
-RUN apt autoremove -y
+# Remove apt list to save a little room (though it probably doesn't matter as much since the image is already really big)
+# Make sure that any files in the home directory are jovyan permission
+RUN rm -rf /var/lib/apt/lists/* && \
+    apt autoremove -y && \
+    chown -R jovyan:users /home/jovyan/
 
 USER jovyan
