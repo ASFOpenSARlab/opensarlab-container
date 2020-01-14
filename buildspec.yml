@@ -1,12 +1,16 @@
 version: 0.2
 
 phases:
+  pre_build:
+    commands:
+    - pip3 install docker-squash
   build:
     commands:
     - cd software
     - sh download.sh
     - cd ..
     - docker build -t my-image:latest .
+    - docker-squash my-image:latest
   post_build:
     commands:
     # $CONTAINER_REPO is defined in the codebuild project that runs this script
