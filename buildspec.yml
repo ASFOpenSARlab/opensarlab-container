@@ -3,7 +3,9 @@ version: 0.2
 phases:
   pre_build:
     commands:
-    - pip install docker-squash
+    - sudo apt update
+    - sudo apt install python3-pip
+    - pip3 install docker-squash
   build:
     commands:
     - cd software
