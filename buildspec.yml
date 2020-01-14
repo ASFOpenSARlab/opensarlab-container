@@ -7,8 +7,7 @@ phases:
       python: 3.8
   pre_build:
     commands:
-    - sudo apt update
-    - sudo apt install python3-pip
+    - sudo apt-get install python3-pip
     # https://github.com/goldmann/docker-squash
     - pip3 install docker-squash
   build:
