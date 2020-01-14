@@ -5,6 +5,7 @@ phases:
     commands:
     - sudo apt update
     - sudo apt install python3-pip
+    # https://github.com/goldmann/docker-squash
     - pip3 install docker-squash
   build:
     commands:
@@ -12,11 +13,11 @@ phases:
     - sh download.sh
     - cd ..
     - docker build -t my-image:latest .
-    - docker-squash my-image:latest
+    - docker-squash -t my-image:squashed my-image:latest
   post_build:
     commands:
     # $CONTAINER_REPO is defined in the codebuild project that runs this script
     - $(aws ecr get-login --no-include-email)
     - export BUILD_TAG=$(date +"%F-%H-%M-%S")
-    - docker tag my-image:latest $CONTAINER_REPO:$BUILD_TAG
+    - docker tag my-image:squashed $CONTAINER_REPO:$BUILD_TAG
     - docker push $CONTAINER_REPO:$BUILD_TAG
