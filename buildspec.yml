@@ -5,7 +5,6 @@ phases:
     runtime-versions:
       docker: 18
       python: 3.8
-  pre_build:
     commands:
     - sudo apt-get install python3-pip
     # https://github.com/goldmann/docker-squash
