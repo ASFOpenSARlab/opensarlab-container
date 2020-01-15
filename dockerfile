@@ -190,21 +190,21 @@ ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
 # ---------------------------------------------------------------------------------------------------------------
 # Install MintPy
 
+ENV MINTPY_HOME=/usr/local/MintPy
+ENV PYAPS_HOME=/usr/local/PyAPS
+ENV PATH=${PATH}:${MINTPY_HOME}/mintpy:${MINTPY_HOME}/sh
+ENV PYTHONPATH=${PYTHONPATH}:${MINTPY_HOME}:${PYAPS_HOME}
+ENV PROJ_LIB=/usr/share/proj
+
 # Pull and config mintpy and pyaps
-COPY software/MintPy /usr/local/MintPy
-COPY software/PyAPS /usr/local/PyAPS
+COPY software/MintPy ${MINTPY_HOME}
+COPY software/PyAPS ${PYAPS_HOME}/pyaps3
 
 RUN pip install 'cdsapi' 'cvxopt' 'dask[complete]>=1.0,<2.0' 'dask-jobqueue>=0.3,<1.0' \
     'h5py' 'lxml' 'matplotlib' 'netcdf4' 'numpy' 'pyproj' 'pykdtree' \
     'pyresample' 'scikit-image' 'scipy' && \
     pip install https://github.com/matplotlib/basemap/archive/master.zip  && \
     pip install pykml -e git+https://github.com/yunjunz/pykml.git#egg=pykml
-
-ENV MINTPY_HOME=/usr/local/MintPy
-ENV PYAPS_HOME=/usr/local/PyAPS
-ENV PATH=${PATH}:${MINTPY_HOME}/mintpy:${MINTPY_HOME}/sh
-ENV PYTHONPATH=${PYTHONPATH}:${MINTPY_HOME}:${PYAPS_HOME}
-ENV PROJ_LIB=/usr/share/proj
 
 # ---------------------------------------------------------------------------------------------------------------
 # Install any other custom and jupyter libaries like widgets
