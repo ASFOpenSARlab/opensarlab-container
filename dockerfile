@@ -36,7 +36,7 @@ RUN apt update && \
     less \
     snaphu
 
-RUN pip install 'awscli' 'boto3>=1.4.4' 'pyyaml>=3.12' 'pandas==0.23.0' 'bokeh' 'matplotlib' 'tensorflow==1.13.1' 'keras' 'plotly' 'rasterio' 'pyproj'
+RUN pip install 'awscli' 'boto3>=1.4.4' 'pyyaml>=3.12' 'matplotlib'
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -209,14 +209,14 @@ RUN pip install 'cdsapi' 'cvxopt' 'dask[complete]>=1.0,<2.0' 'dask-jobqueue>=0.3
 # ---------------------------------------------------------------------------------------------------------------
 # Install any other custom and jupyter libaries like widgets
 # Use pip (conda version) since we want to corner off GIAnT's work and also run it with Jupyter
-RUN pip install nbgitpuller asf-hyp3 jupyter_contrib_nbextensions ipywidgets mpldatacursor nbserverproxy
+RUN pip install nbgitpuller asf-hyp3 jupyter_contrib_nbextensions ipywidgets mpldatacursor jupyter-server-proxy
 
 # Activate git puller so users get the latest notebooks
 # Enable jupyter widgets
 # Install JavaScript and CSS for extensions
 # Disable extension GUI in menu.
 # Enable specific extensions
-# Install and enable bokeh extensions. THe nbserver is needed for the extensions to work properly due to Jupyter limitations.
+# Install and enable bokeh extensions. The jupyter_server_proxy extension is needed for the extensions to work properly due to Jupyter limitations.
 RUN jupyter serverextension enable --py nbgitpuller --sys-prefix && \
     jupyter nbextension enable --py widgetsnbextension && \
     jupyter contrib nbextension install --system && \
@@ -224,7 +224,7 @@ RUN jupyter serverextension enable --py nbgitpuller --sys-prefix && \
     jupyter nbextension enable hide_input/main && \
     jupyter nbextension enable freeze/main && \
     jupyter labextension install jupyterlab_bokeh && \
-    jupyter serverextension enable --py nbserverproxy
+    jupyter serverextension enable --sys-prefix jupyter_server_proxy
 
 # Remove over 1 GB of latex files to save space
 RUN apt remove -y texlive*
