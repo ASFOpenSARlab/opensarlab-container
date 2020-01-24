@@ -209,7 +209,7 @@ RUN pip install 'cdsapi' 'cvxopt' 'dask[complete]>=1.0,<2.0' 'dask-jobqueue>=0.3
 # ---------------------------------------------------------------------------------------------------------------
 # Install any other custom and jupyter libaries like widgets
 # Use pip (conda version) since we want to corner off GIAnT's work and also run it with Jupyter
-RUN pip install nbgitpuller asf-hyp3 jupyter_contrib_nbextensions ipywidgets mpldatacursor jupyter-server-proxy
+RUN pip install nbgitpuller asf-hyp3 jupyter_contrib_nbextensions ipywidgets mpldatacursor nbserverproxy
 
 # Activate git puller so users get the latest notebooks
 # Enable jupyter widgets
@@ -224,7 +224,7 @@ RUN jupyter serverextension enable --py nbgitpuller --sys-prefix && \
     jupyter nbextension enable hide_input/main && \
     jupyter nbextension enable freeze/main && \
     jupyter labextension install jupyterlab_bokeh && \
-    jupyter serverextension enable --sys-prefix jupyter_server_proxy
+    jupyter serverextension enable --py nbserverproxy
 
 # Remove over 1 GB of latex files to save space
 RUN apt remove -y texlive*
