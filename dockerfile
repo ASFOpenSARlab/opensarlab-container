@@ -36,7 +36,7 @@ RUN apt update && \
     less \
     snaphu
 
-RUN pip install 'awscli' 'boto3>=1.4.4' 'pyyaml>=3.12' 'matplotlib'
+RUN pip install 'awscli' 'boto3>=1.4.4' 'pyyaml>=3.12' 'matplotlib' 'bokeh'
 
 
 # ---------------------------------------------------------------------------------------------------------------
