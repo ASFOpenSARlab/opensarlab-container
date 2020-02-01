@@ -174,7 +174,6 @@ COPY software/prepdataxml.py /usr/local/GIAnT/prepdataxml.py
 RUN pip2 install 'numpy' 'gdal==3.0.2' 'boto3' 'lxml' 'requests' 'Pillow'
 
 COPY software/hyp3-lib /usr/local/hyp3-lib
-COPY software/get_dem.py.cfg /usr/local/hyp3-lib/config/get_dem.py.cfg
 
 ENV PYTHONPATH $PYTHONPATH:/usr/local/hyp3-lib/src
 
