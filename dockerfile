@@ -1,4 +1,4 @@
-FROM jupyter/minimal-notebook:df4a9681f19c
+FROM jupyter/minimal-notebook:dc9744740e12
 LABEL MAINTAINER="Alaska Satellite Facility"
 
 # By default, the notebook base image is set to non-sudo user joyvan. This makes root-ful actions difficult.
