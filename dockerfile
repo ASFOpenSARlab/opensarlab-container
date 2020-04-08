@@ -215,14 +215,12 @@ RUN pip install nbgitpuller asf-hyp3 jupyter_contrib_nbextensions ipywidgets mpl
 # Install JavaScript and CSS for extensions
 # Disable extension GUI in menu.
 # Enable specific extensions
-# Install and enable bokeh extensions. The jupyter_server_proxy extension is needed for the extensions to work properly due to Jupyter limitations.
 RUN jupyter serverextension enable --py nbgitpuller --sys-prefix && \
     jupyter nbextension enable --py widgetsnbextension && \
     jupyter contrib nbextension install --system && \
     jupyter nbextensions_configurator disable --system && \
     jupyter nbextension enable hide_input/main && \
     jupyter nbextension enable freeze/main && \
-    jupyter labextension install jupyterlab_bokeh && \
     jupyter serverextension enable --py nbserverproxy
 
 # Remove over 1 GB of latex files to save space
