@@ -54,6 +54,16 @@ if [ ! -d PyAPS ] ; then
     git clone -b master --single-branch https://github.com/yunjunz/pyaps3.git PyAPS
 fi
 
+echo "Downloading ARIA-Tools"
+if [ ! -d ARIA-tools ] ; then
+    git clone -b master --single-branch https://github.com/aria-tools/ARIA-tools.git ARIA-tools
+fi
+
+echo "Downloading ARIA-Docs"
+if [ ! -d ARIA-tools-docs ] ; then
+    git clone -b master --single-branch https://github.com/aria-tools/ARIA-tools-docs.git ARIA-tools-docs
+fi
+
 echo "Downloading snap..."
 aws s3 sync --exclude '*' --include 'esa-snap_sentinel_unix_7_0.sh' s3://asf-jupyter-software/ . --profile=$profile
 

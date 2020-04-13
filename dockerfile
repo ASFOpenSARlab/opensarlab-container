@@ -206,6 +206,22 @@ RUN pip install 'cdsapi' 'cvxopt' 'dask[complete]>=1.0,<2.0' 'dask-jobqueue>=0.3
     pip install pykml -e git+https://github.com/yunjunz/pykml.git#egg=pykml
 
 # ---------------------------------------------------------------------------------------------------------------
+# Install ARIA Tools and Docs
+
+ENV ARIA_TOOLS_HOME=/usr/local/ARIA-tools
+ENV ARIA_TOOLS_DOCS_HOME=/usr/local/ARIA-tools-docs
+
+# Tools
+COPY software/ARIA-tools ${ARIA_TOOLS_HOME}
+RUN pip install 'shapely' 'joblib' && \
+    cd ${ARIA_TOOLS_HOME} && \
+    python setup.py install && \
+    cd /
+
+# Docs
+COPY software/ARIA-tools-docs ${ARIA_TOOLS_DOCS_HOME}
+
+# ---------------------------------------------------------------------------------------------------------------
 # Install any other custom and jupyter libaries like widgets
 # Use pip (conda version) since we want to corner off GIAnT's work and also run it with Jupyter
 RUN pip install nbgitpuller asf-hyp3 jupyter_contrib_nbextensions ipywidgets mpldatacursor nbserverproxy
