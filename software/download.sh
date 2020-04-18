@@ -56,7 +56,7 @@ fi
 
 echo "Downloading ARIA-Tools"
 if [ ! -d ARIA-tools ] ; then
-    git clone -b master --single-branch https://github.com/aria-tools/ARIA-tools.git ARIA-tools
+    git clone -b dev --single-branch https://github.com/aria-tools/ARIA-tools.git ARIA-tools
 fi
 
 echo "Downloading ARIA-Docs"
