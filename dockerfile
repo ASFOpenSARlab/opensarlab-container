@@ -201,8 +201,7 @@ COPY software/PyAPS ${PYAPS_HOME}/pyaps3
 
 RUN pip install 'cdsapi' 'cvxopt' 'dask[complete]>=1.0,<2.0' 'dask-jobqueue>=0.3,<1.0' \
     'h5py' 'lxml' 'matplotlib' 'netcdf4' 'numpy' 'pyproj' 'pykdtree' \
-    'pyresample' 'scikit-image' 'scipy' && \
-    pip install https://github.com/matplotlib/basemap/archive/master.zip  && \
+    'pyresample' 'scikit-image' 'scipy' 'cartopy' && \
     pip install pykml -e git+https://github.com/yunjunz/pykml.git#egg=pykml
 
 # ---------------------------------------------------------------------------------------------------------------
