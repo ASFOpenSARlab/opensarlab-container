@@ -199,10 +199,12 @@ ENV PROJ_LIB=/usr/share/proj
 COPY software/MintPy ${MINTPY_HOME}
 COPY software/PyAPS ${PYAPS_HOME}/pyaps3
 
+RUN apt install -y cython3 proj-bin libgeos-3.6.2 libgeos-dev libproj-dev
 RUN pip install 'cdsapi' 'cvxopt' 'dask[complete]>=1.0,<2.0' 'dask-jobqueue>=0.3,<1.0' \
     'h5py' 'lxml' 'matplotlib' 'netcdf4' 'numpy' 'pyproj' 'pykdtree' \
-    'pyresample' 'scikit-image' 'scipy' 'cartopy' && \
-    pip install pykml -e git+https://github.com/yunjunz/pykml.git#egg=pykml
+    'pyresample' 'scikit-image' 'scipy'
+RUN pip install 'cartopy'
+RUN pip install pykml -e git+https://github.com/yunjunz/pykml.git#egg=pykml
 
 # ---------------------------------------------------------------------------------------------------------------
 # Install ARIA Tools and Docs
