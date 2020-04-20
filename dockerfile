@@ -201,8 +201,7 @@ COPY software/PyAPS ${PYAPS_HOME}/pyaps3
 
 RUN apt install -y cython3 proj-bin libgeos-3.6.2 libgeos-dev libproj-dev
 RUN pip install 'cdsapi' 'cvxopt' 'dask[complete]>=1.0,<2.0' 'dask-jobqueue>=0.3,<1.0' \
-    'h5py' 'lxml' 'matplotlib' 'netcdf4' 'numpy' 'pyproj' 'pykdtree' \
-    'pyresample' 'scikit-image' 'scipy'
+    'h5py' 'lxml' 'matplotlib' 'netcdf4' 'numpy' 'pyproj' 'pykdtree' 'pyresample' 'scikit-image' 'scipy'
 RUN pip install git+https://github.com/SciTools/cartopy.git --no-binary cartopy  # dev version
 RUN pip install pykml -e git+https://github.com/yunjunz/pykml.git#egg=pykml
 
