@@ -94,7 +94,7 @@ RUN apt install -y --no-install-recommends \
     libgfortran3 \
     libfftw3-dev
 
-RUN pip3 install 'numpy' 'h5py' 'scipy'
+RUN pip3 install 'numpy' 'h5py' 'scipy' 'gdal'
 
 COPY software/isce.rpm /tmp/isce.rpm
 
