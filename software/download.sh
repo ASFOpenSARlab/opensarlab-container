@@ -31,7 +31,7 @@ fi
 echo "Downloading isce...."
 if [ ! -d isce ] ; then
     aws s3 sync --exclude '*' --include 'isce-2.3-1.x86_64.rpm' s3://asf-jupyter-software/ . --profile=$profile
-    mv isce-2.3-1.x86_64.rpm isce.rpm 
+    mv isce-2.3-1.x86_64.rpm isce.rpm
 fi
 
 echo "Downloading TRAIN..."

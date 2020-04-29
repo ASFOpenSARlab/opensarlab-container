@@ -96,10 +96,12 @@ RUN apt install -y --no-install-recommends \
 
 RUN pip3 install 'numpy' 'h5py' 'scipy'
 
-COPY software/isce.rpm $ISCE_HOME
+COPY software/isce.rpm /tmp/isce.rpm
 
-RUN alien isce.rpm \
-    && dpkg -i isce*.deb
+RUN cd /tmp \
+    && alien isce.rpm \
+    && dpkg -i isce*.deb \
+    && cd /
 
 # Add extra files to ISCE
 COPY software/topo.py $ISCE_HOME/applications/
