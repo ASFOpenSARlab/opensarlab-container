@@ -79,29 +79,33 @@ ENV PATH $PATH:$MAPREADY_HOME/bin/:$MAPREADY_HOME/lib/:$MAPREADY_HOME/share/
 # ---------------------------------------------------------------------------------------------------------------
 # Install ISCE.
 
-RUN apt update && \
-    apt install --no-install-recommends -y \
-    gdal-bin \
-    gfortran \
-    libgfortran3 \
-    libfftw3-dev \
-    curl
-
-RUN pip install 'numpy>=1.13.0' 'h5py' 'gdal==3.0.2' 'scipy'
-
-ENV ISCE_HOME /usr/local/isce/isce
-ENV PYTHONPATH $PYTHONPATH:/usr/local/isce/
+ENV ISCE_HOME /opt/isce2/isce/
+ENV PYTHONPATH $PYTHONPATH:/opt/isce2
 ENV PATH $PATH:$ISCE_HOME/bin:$ISCE_HOME/applications
 
-COPY software/isce $ISCE_HOME
+RUN apt update -y
+RUN apt install -y --no-install-recommends \
+    alien \
+    python3-dev \
+    python3-gdal \
+    gdal-bin \
+    libgdal-dev \
+    gfortran \
+    libgfortran3 \
+    libfftw3-dev
+
+RUN pip3 install 'numpy' 'h5py' 'scipy'
+
+COPY software/isce.rpm $ISCE_HOME
+
+RUN alien isce.rpm \
+    && dpkg -i isce*.deb
 
 # Add extra files to ISCE
-COPY software/focus.py $ISCE_HOME/applications/
 COPY software/topo.py $ISCE_HOME/applications/
 COPY software/unpackFrame_ALOS_raw.py $ISCE_HOME/applications/
 
 RUN chmod 755 $ISCE_HOME/applications/*
-
 
 # ---------------------------------------------------------------------------------------------------------------
 # Install SNAP 7.0

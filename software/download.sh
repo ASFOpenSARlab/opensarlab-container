@@ -30,8 +30,8 @@ fi
 
 echo "Downloading isce...."
 if [ ! -d isce ] ; then
-    aws s3 sync --exclude '*' --include 'isce.zip' s3://asf-jupyter-software/ . --profile=$profile
-    unzip isce.zip
+    aws s3 sync --exclude '*' --include 'isce-2.3-1.x86_64.rpm' s3://asf-jupyter-software/ . --profile=$profile
+    mv isce-2.3-1.x86_64.rpm isce.rpm 
 fi
 
 echo "Downloading TRAIN..."
@@ -46,7 +46,7 @@ fi
 
 echo "Downloading MintPy"
 if [ ! -d MintPy ] ; then
-    git clone -b master --single-branch https://github.com/insarlab/MintPy.git
+    git clone -b v1.2.2 --single-branch https://github.com/insarlab/MintPy.git
 fi
 
 echo "Downloading PyAPS"
@@ -56,7 +56,7 @@ fi
 
 echo "Downloading ARIA-Tools"
 if [ ! -d ARIA-tools ] ; then
-    git clone -b dev --single-branch https://github.com/aria-tools/ARIA-tools.git ARIA-tools
+    git clone -b v1.1 --single-branch https://github.com/aria-tools/ARIA-tools.git ARIA-tools
 fi
 
 echo "Downloading ARIA-Docs"
