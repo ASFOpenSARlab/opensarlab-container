@@ -86,15 +86,12 @@ ENV PATH $PATH:$ISCE_HOME/bin:$ISCE_HOME/applications
 RUN apt update -y
 RUN apt install -y --no-install-recommends \
     alien \
-    python3-dev \
-    python3-gdal \
     gdal-bin \
-    libgdal-dev \
     gfortran \
     libgfortran3 \
     libfftw3-dev
 
-RUN pip3 install 'numpy' 'h5py' 'scipy' 'gdal'
+RUN pip install 'numpy' 'h5py' 'scipy' 'gdal'
 
 COPY software/isce.rpm /tmp/isce.rpm
 
