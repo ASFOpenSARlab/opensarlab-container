@@ -90,7 +90,7 @@ RUN apt install -y --no-install-recommends \
     gfortran \
     libgfortran3 \
     libfftw3-dev \
-    libXm4 \
+    libxm4 \
     gfortran-8
 
 RUN cp /usr/lib/x86_64-linux-gnu/libgfortran.so.4 /usr/lib/x86_64-linux-gnu/libgfortran.so.5 \
