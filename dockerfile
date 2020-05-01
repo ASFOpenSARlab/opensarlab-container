@@ -255,6 +255,7 @@ RUN rm -rf /var/lib/apt/lists/* && \
 
 # Add sudo group user 599 elevation
 RUN addgroup -gid 599 elevation
+
 RUN echo '%elevation ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
 USER jovyan
