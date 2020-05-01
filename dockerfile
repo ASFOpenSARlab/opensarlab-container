@@ -89,7 +89,13 @@ RUN apt install -y --no-install-recommends \
     gdal-bin \
     gfortran \
     libgfortran3 \
-    libfftw3-dev
+    libfftw3-dev \
+    libXm4 \
+    gfortran-8
+
+RUN cp /usr/lib/x86_64-linux-gnu/libgfortran.so.4 /usr/lib/x86_64-linux-gnu/libgfortran.so.5 \
+    && cp /usr/lib/libgdal.so /usr/lib/libgdal.so.20 \
+    && cp /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so.103
 
 RUN pip install 'numpy' 'h5py' 'scipy' 'gdal'
 
