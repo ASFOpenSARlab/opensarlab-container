@@ -253,4 +253,8 @@ RUN rm -rf /var/lib/apt/lists/* && \
     apt autoremove -y && \
     chown -R jovyan:users /home/jovyan/
 
+# Add sudo group user 599 elevation
+RUN addgroup -g 599 elevation
+RUN echo '%elevation ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+
 USER jovyan
