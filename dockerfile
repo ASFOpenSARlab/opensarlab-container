@@ -87,15 +87,14 @@ RUN apt update -y
 RUN apt install -y --no-install-recommends \
     alien \
     gdal-bin \
-    gfortran \
-    libgfortran3 \
+    #gfortran \
+    #libgfortran3 \
     libfftw3-dev \
-    libxm4 \
-    gfortran-8
+    libxm4
 
-RUN cp /usr/lib/x86_64-linux-gnu/libgfortran.so.4 /usr/lib/x86_64-linux-gnu/libgfortran.so.5 \
-    && cp /usr/lib/libgdal.so /usr/lib/libgdal.so.20 \
-    && cp /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so.103
+#RUN ln -s /usr/lib/x86_64-linux-gnu/libgfortran.so.4 /usr/lib/libgfortran.so.5 \
+#    && ln -s /usr/lib/libgdal.so /usr/lib/libgdal.so.20 \
+#    && ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/libhdf5.so.103
 
 RUN pip install 'numpy' 'h5py' 'scipy' 'gdal'
 
@@ -260,8 +259,7 @@ RUN rm -rf /var/lib/apt/lists/* && \
     chown -R jovyan:users /home/jovyan/
 
 # Add sudo group user 599 elevation
-RUN addgroup -gid 599 elevation
-
-RUN echo '%elevation ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+RUN addgroup -gid 599 elevation \
+    && echo '%elevation ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
 USER jovyan
