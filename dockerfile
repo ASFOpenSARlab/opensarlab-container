@@ -87,9 +87,12 @@ RUN apt update -y
 RUN apt install -y --no-install-recommends \
     alien \
     gdal-bin \
-    gfortran \
-    libgfortran3 \
-    libfftw3-dev
+    gfortran-8 \
+    libfftw3-dev \
+    libxm4
+
+RUN ln -s /usr/lib/libgdal.so /usr/lib/libgdal.so.20 \
+    && ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.103
 
 RUN pip install 'numpy' 'h5py' 'scipy' 'gdal'
 
@@ -252,5 +255,9 @@ RUN sed -i '/LaTeX/d' /opt/conda/lib/python3.7/site-packages/notebook/templates/
 RUN rm -rf /var/lib/apt/lists/* && \
     apt autoremove -y && \
     chown -R jovyan:users /home/jovyan/
+
+# Add sudo group user 599 elevation
+RUN addgroup -gid 599 elevation \
+    && echo '%elevation ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
 USER jovyan
