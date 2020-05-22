@@ -34,7 +34,8 @@ RUN apt update && \
     vim \
     rsync \
     less \
-    snaphu
+    snaphu \
+    curl
 
 RUN pip install 'awscli' 'boto3>=1.4.4' 'pyyaml>=3.12' 'matplotlib' 'bokeh'
 
@@ -89,7 +90,9 @@ RUN apt install -y --no-install-recommends \
     gdal-bin \
     gfortran-8 \
     libfftw3-dev \
-    libxm4
+    libxm4 \
+    libgfortran3 \
+    gfortran
 
 RUN ln -s /usr/lib/libgdal.so /usr/lib/libgdal.so.20 \
     && ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.103 \
