@@ -90,9 +90,7 @@ RUN apt install -y --no-install-recommends \
     gdal-bin \
     gfortran-8 \
     libfftw3-dev \
-    libxm4 \
-    libgfortran3 \
-    gfortran
+    libxm4
 
 RUN ln -s /usr/lib/libgdal.so /usr/lib/libgdal.so.20 \
     && ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.103 \
@@ -112,6 +110,9 @@ COPY software/topo.py $ISCE_HOME/applications/
 COPY software/unpackFrame_ALOS_raw.py $ISCE_HOME/applications/
 
 RUN chmod 755 $ISCE_HOME/applications/*
+
+# Install after ISCE because of possible conflicts
+RUN apt install -y libgfortran3 gfortran
 
 # ---------------------------------------------------------------------------------------------------------------
 # Install SNAP 7.0
