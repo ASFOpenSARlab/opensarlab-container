@@ -96,7 +96,7 @@ RUN ln -s /usr/lib/libgdal.so /usr/lib/libgdal.so.20 \
     && ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.103 \
     && ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.10
 
-RUN pip install 'numpy' 'h5py' 'scipy' 'gdal'
+RUN pip install 'numpy' 'h5py' 'scipy' 'gdal==3.0.2'
 
 COPY software/isce.rpm /tmp/isce.rpm
 
