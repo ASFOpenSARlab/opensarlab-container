@@ -34,14 +34,9 @@ if [ ! -d isce ] ; then
     mv isce-2.3-1.x86_64.rpm isce.rpm
 fi
 
-echo "Downloading TRAIN..."
+echo "Downloading TRAIN (python 3 version)..."
 if [ ! -d TRAIN ] ; then
-    git clone -b test --single-branch https://github.com/asfadmin/hyp3-TRAIN.git TRAIN
-fi
-
-echo "Downloading hyp3-lib"
-if [ ! -d hyp3-lib ] ; then
-    git clone -b test --single-branch https://github.com/asfadmin/hyp3-lib.git
+    git clone -b OpenSARlab --single-branch https://github.com/asfadmin/hyp3-TRAIN.git TRAIN
 fi
 
 echo "Downloading MintPy"

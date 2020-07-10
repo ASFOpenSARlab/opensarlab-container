@@ -179,19 +179,16 @@ COPY software/prepdataxml.py /usr/local/GIAnT/prepdataxml.py
 
 
 # ---------------------------------------------------------------------------------------------------------------
-# Install hyp3-lib (which only runs in python2)
+# Install hyp3-lib
 # Prereq for TRAIN
-# Only copy what is needed. Other unused libs might have prerequisites which might bloat things
-RUN pip2 install 'numpy' 'gdal==3.0.2' 'boto3' 'lxml' 'requests' 'Pillow'
+RUN apt update && \
+    apt install -y gdal-bin
 
-COPY software/hyp3-lib /usr/local/hyp3-lib
-
-ENV PYTHONPATH $PYTHONPATH:/usr/local/hyp3-lib/src
-
+RUN pip install hyp3lib
 
 # ---------------------------------------------------------------------------------------------------------------
-# Install TRAIN (which only runs in python2)
-RUN pip2 install 'numpy' 'netCDF4' 'scipy==0.18.1' 'gdal==3.0.2'
+# Install TRAIN (python 3 version)
+RUN pip install 'numpy' 'netCDF4' 'scipy>=0.18.1' 'gdal>=3.0.2'
 
 COPY software/TRAIN/ /usr/local/TRAIN/
 ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
