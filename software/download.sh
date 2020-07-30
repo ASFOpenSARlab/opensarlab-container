@@ -28,6 +28,12 @@ if [ ! -d ASF_MapReady ] ; then
     unzip mapready-u18.zip
 fi
 
+echo "Downloading isce...."
+if [ ! -d isce ] ; then
+    aws s3 sync --exclude '*' --include 'isce-2.3-1.x86_64.rpm' s3://asf-jupyter-software/ . --profile=$profile
+    mv isce-2.3-1.x86_64.rpm isce.rpm
+fi
+
 echo "Downloading TRAIN (python 3 version)..."
 if [ ! -d TRAIN ] ; then
     git clone -b OpenSARlab --single-branch https://github.com/asfadmin/hyp3-TRAIN.git TRAIN
@@ -62,5 +68,9 @@ echo "Downloading other files...."
 aws s3 sync --exclude '*' --include 'focus.py' s3://asf-jupyter-software/ . --profile=$profile
 
 aws s3 sync --exclude '*' --include 'prepdataxml.py' s3://asf-jupyter-software/ . --profile=$profile
+
+aws s3 sync --exclude '*' --include 'topo.py' s3://asf-jupyter-software/ . --profile=$profile
+
+aws s3 sync --exclude '*' --include 'unpackFrame_ALOS_raw.py' s3://asf-jupyter-software/ . --profile=$profile
 
 aws s3 sync --exclude '*' --include 'gpt.vmoptions' s3://asf-jupyter-software/ . --profile=$profile
