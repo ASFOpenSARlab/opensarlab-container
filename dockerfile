@@ -79,40 +79,8 @@ ENV PATH $PATH:$MAPREADY_HOME/bin/:$MAPREADY_HOME/lib/:$MAPREADY_HOME/share/
 
 # ---------------------------------------------------------------------------------------------------------------
 # Install ISCE.
-
-ENV ISCE_HOME /opt/isce2/isce/
-ENV PYTHONPATH $PYTHONPATH:/opt/isce2
-ENV PATH $PATH:$ISCE_HOME/bin:$ISCE_HOME/applications
-
-RUN apt update -y
-RUN apt install -y --no-install-recommends \
-    alien \
-    gdal-bin \
-    gfortran-8 \
-    libfftw3-dev \
-    libxm4
-
-RUN ln -s /usr/lib/libgdal.so /usr/lib/libgdal.so.20 \
-    && ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.103 \
-    && ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.10
-
-RUN pip install 'numpy' 'h5py' 'scipy' 'gdal==3.0.2'
-
-COPY software/isce.rpm /tmp/isce.rpm
-
-RUN cd /tmp \
-    && alien isce.rpm \
-    && dpkg -i isce*.deb \
-    && cd /
-
-# Add extra files to ISCE
-COPY software/topo.py $ISCE_HOME/applications/
-COPY software/unpackFrame_ALOS_raw.py $ISCE_HOME/applications/
-
-RUN chmod 755 $ISCE_HOME/applications/*
-
-# Install after ISCE because of possible conflicts
-RUN apt install -y libgfortran3 gfortran
+RUN /opt/conda/bin/conda config --add channels conda-forge && \
+    /opt/conda/bin/conda install -y isce2 
 
 # ---------------------------------------------------------------------------------------------------------------
 # Install SNAP 7.0
