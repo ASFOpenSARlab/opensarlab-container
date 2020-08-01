@@ -1,3 +1,90 @@
+# The isce-builder section is taken from https://github.com/isce-framework/isce2/blob/main/docker/Dockerfile
+# The only change is the refernce to a `software/isce2` directory instead of `.` under `copy repo`.
+FROM hysds/dev:latest as isce-builder
+
+# Set an encoding to make things work smoothly.
+ENV LANG en_US.UTF-8
+
+# Set ISCE repo
+ENV ISCE_ORG isce-framework
+
+# set to root user
+USER root
+
+# install tools for RPM generation
+RUN set -ex \
+ && yum update -y \
+ && yum groupinstall -y "development tools" \
+ && yum install -y \
+      make ruby-devel rpm-build rubygems \
+ && gem install ffi -v 1.12.2 \
+ && gem install --no-ri --no-rdoc fpm
+
+# install isce requirements
+RUN set -ex \
+ && . /opt/conda/bin/activate root \
+ && conda install --yes \
+      cython \
+      gdal \
+      git \
+      h5py \
+      libgdal \
+      pytest \
+      numpy \
+      fftw \
+      scipy \
+      scons \
+      hdf4 \
+      hdf5 \
+      netcdf4 \
+      libgcc \
+      libstdcxx-ng \
+      cmake \
+      opencv \
+ && yum install -y uuid-devel x11-devel motif-devel jq \
+ && ln -sf /opt/conda/bin/cython /opt/conda/bin/cython3 \
+ && mkdir -p /opt/isce2/src
+
+# override system libuuid into conda env to link in libXm and libXt
+RUN set -ex \
+ && cd /opt/conda/lib \
+ && unlink libuuid.so \
+ && unlink libuuid.so.1 \
+ && ln -s /lib64/libuuid.so.1.3.0 libuuid.so \
+ && ln -s /lib64/libuuid.so.1.3.0 libuuid.so.1
+
+# install libgfortran.so.3 and create missing link
+RUN set -ex \
+ && yum install -y gcc-gfortran \
+ && cd /lib64 \
+ && ( test -f libgfortran.so || ln -sv libgfortran.so.*.* libgfortran.so )
+
+# copy repo
+COPY software/isce2 /opt/isce2/src/isce2
+
+# build ISCE
+RUN set -ex \
+ && . /opt/conda/bin/activate root \
+ && cd /opt/isce2/src/isce2 \
+ && source docker/build_env.sh \
+ && mkdir -p $BUILD_DIR \
+ && cp docker/SConfigISCE configuration/SConfigISCE \
+ && scons install \
+ && cp docker/isce_env.sh $ISCE_INSTALL_ROOT \
+ && cd /tmp \
+ && mkdir -p /tmp/rpm-build/opt \
+ && mv $ISCE_INSTALL_ROOT /tmp/rpm-build/opt \
+ && curl -s https://api.github.com/repos/$ISCE_ORG/isce2/git/refs/heads/main \
+    > /tmp/rpm-build/opt/isce2/version.json \
+ && hash=$(cat /tmp/rpm-build/opt/isce2/version.json | jq -r .object.sha) \
+ && short_hash=$(echo $hash | cut -c1-5) \
+ && fpm -s dir -t rpm -C /tmp/rpm-build --name isce \
+      --prefix=/ --version=2.3 --provides=isce \
+      --maintainer=piyush.agram@jpl.nasa.gov \
+      --description="InSAR Scientific Computing Environment v2 (${hash})"
+
+##################################################################################################################
+
 FROM jupyter/minimal-notebook:dc9744740e12
 LABEL MAINTAINER="Alaska Satellite Facility"
 
@@ -79,8 +166,40 @@ ENV PATH $PATH:$MAPREADY_HOME/bin/:$MAPREADY_HOME/lib/:$MAPREADY_HOME/share/
 
 # ---------------------------------------------------------------------------------------------------------------
 # Install ISCE.
-RUN /opt/conda/bin/conda config --add channels conda-forge && \
-    /opt/conda/bin/conda install -y isce2 
+
+ENV ISCE_HOME /opt/isce2/isce/
+ENV PYTHONPATH $PYTHONPATH:/opt/isce2
+ENV PATH $PATH:$ISCE_HOME/bin:$ISCE_HOME/applications
+
+RUN apt update -y
+RUN apt install -y --no-install-recommends \
+    alien \
+    gdal-bin \
+    gfortran-4.8 \
+    libfftw3-dev \
+    libxm4 \
+    libgdal-dev
+
+RUN ln -s /usr/lib/libgdal.so /usr/lib/libgdal.so.20 \
+    && ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.101 \
+    && ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.10
+
+RUN pip install 'numpy' 'h5py' 'scipy' 'gdal==3.0.2'
+
+COPY --from=isce-builder /tmp/isce-2.3-1.x86_64.rpm /tmp/isce-2.3-1.x86_64.rpm
+
+RUN cd /tmp \
+  && alien isce-2.3-1.x86_64.rpm \
+  && dpkg -i isce*.deb \
+  && cd /
+
+# Add extra files to ISCE
+COPY software/topo.py $ISCE_HOME/applications/
+COPY software/unpackFrame_ALOS_raw.py $ISCE_HOME/applications/
+RUN chmod 755 $ISCE_HOME/applications/*
+
+# Install after ISCE because of possible conflicts
+RUN apt install -y libgfortran3 gfortran
 
 # ---------------------------------------------------------------------------------------------------------------
 # Install SNAP 7.0
