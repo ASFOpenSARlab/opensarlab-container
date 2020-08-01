@@ -28,10 +28,9 @@ if [ ! -d ASF_MapReady ] ; then
     unzip mapready-u18.zip
 fi
 
-echo "Downloading isce...."
-if [ ! -d isce ] ; then
-    aws s3 sync --exclude '*' --include 'isce-2.3-1.x86_64.rpm' s3://asf-jupyter-software/ . --profile=$profile
-    mv isce-2.3-1.x86_64.rpm isce.rpm
+echo "Downloading isce2...."
+if [ ! -d isce2 ] ; then
+    git clone -b main --single-branch https://github.com/isce-framework/isce2.git isce2
 fi
 
 echo "Downloading TRAIN (python 3 version)..."
