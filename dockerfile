@@ -124,7 +124,7 @@ RUN apt update && \
     snaphu \
     curl
 
-RUN pip install 'awscli' 'boto3>=1.4.4' 'pyyaml>=3.12' 'matplotlib' 'bokeh'
+RUN pip install 'awscli' 'boto3>=1.4.4' 'pyyaml>=3.12' 'matplotlib==3.1.3' 'bokeh'
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -296,7 +296,7 @@ COPY software/PyAPS ${PYAPS_HOME}/pyaps3
 
 RUN apt install -y cython3 proj-bin libgeos-3.6.2 libgeos-dev libproj-dev
 RUN pip install 'cdsapi' 'cvxopt' 'dask[complete]>=1.0,<2.0' 'dask-jobqueue>=0.3,<1.0' cython \
-    'h5py' 'lxml' 'matplotlib' 'netcdf4' 'numpy' 'pyproj' 'pykdtree' 'pyresample' 'scikit-image' 'scipy'
+    'h5py' 'lxml' 'matplotlib==3.1.3' 'netcdf4' 'numpy' 'pyproj' 'pykdtree' 'pyresample' 'scikit-image' 'scipy'
 RUN pip install git+https://github.com/SciTools/cartopy.git --no-binary cartopy  # dev version
 RUN pip install pykml -e git+https://github.com/yunjunz/pykml.git#egg=pykml
 
