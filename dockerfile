@@ -320,7 +320,7 @@ COPY software/ARIA-tools-docs ${ARIA_TOOLS_DOCS_HOME}
 # Install any other custom and jupyter libaries like widgets
 # Use pip (conda version) since we want to corner off GIAnT's work and also run it with Jupyter
 RUN pip install nbgitpuller asf-hyp3 jupyter_contrib_nbextensions ipywidgets mpldatacursor
-RUN pip install rise
+RUN pip install rise hide_code
 
 # Activate git puller so users get the latest notebooks
 # Enable jupyter widgets
@@ -330,7 +330,10 @@ RUN jupyter serverextension enable --py nbgitpuller --sys-prefix && \
     jupyter nbextension enable --py widgetsnbextension && \
     jupyter contrib nbextension install --system && \
     jupyter nbextensions_configurator enable --user && \
-    jupyter-nbextension enable rise --py --sys-prefix
+    jupyter-nbextension enable rise --py --sys-prefix && \
+    jupyter nbextension install --py hide_code && \
+    jupyter nbextension enable --py hide_code && \
+    jupyter serverextension enable --py hide_code 
 
 # Remove over 1 GB of latex files to save space
 RUN apt remove -y texlive*
