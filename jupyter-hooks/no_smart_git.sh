@@ -1,5 +1,4 @@
 pip install --user \
-    nbgitpuller \
     ipywidgets \
     mpldatacursor \
     rise \
