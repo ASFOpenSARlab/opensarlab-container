@@ -319,8 +319,7 @@ COPY software/ARIA-tools-docs ${ARIA_TOOLS_DOCS_HOME}
 # ---------------------------------------------------------------------------------------------------------------
 # Install any other custom and jupyter libaries like widgets
 # Use pip (conda version) since we want to corner off GIAnT's work and also run it with Jupyter
-RUN pip install nbgitpuller asf-hyp3
-RUN jupyter serverextension enable --py nbgitpuller
+RUN pip install asf-hyp3
 RUN conda install -c conda-forge jupyter_contrib_nbextensions -y
 
 # Remove over 1 GB of latex files to save space
@@ -340,19 +339,9 @@ RUN rm -rf /var/lib/apt/lists/* && \
 RUN addgroup -gid 599 elevation \
     && echo '%elevation ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
+# Add jupyter hooks
+COPY jupyter-hooks /etc/jupyter-hooks
+RUN chmod -R 755 /etc/jupyter-hooks && \
+    chown -R jovyan:users /etc/jupyter-hooks
+
 USER jovyan
-
-# Extensions
-RUN pip install --user \
-    ipywidgets \
-    mpldatacursor \
-    rise \
-    hide_code \
-    jupyter_nbextensions_configurator 
-
-RUN jupyter nbextensions_configurator enable --user && \
-    jupyter nbextension enable --py widgetsnbextension --user && \
-    jupyter-nbextension enable rise --py --user && \ 
-    jupyter nbextension install --py hide_code --user && \
-    jupyter nbextension enable --py hide_code --user && \
-    jupyter serverextension enable --py hide_code --user
