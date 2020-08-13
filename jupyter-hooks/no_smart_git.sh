@@ -16,4 +16,6 @@ jupyter nbextension install --py hide_code --user
 jupyter nbextension enable --py hide_code --user
 jupyter serverextension enable --py hide_code --user
 
+cp custom_magics/00-df.py /home/jovyan/.ipython/profile_default/startup/00-df.py
+
 echo 'No git puller enabled.'
