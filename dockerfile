@@ -1,5 +1,9 @@
 # The isce-builder section is taken from https://github.com/isce-framework/isce2/blob/main/docker/Dockerfile
-# The only change is the refernce to a `software/isce2` directory instead of `.` under `copy repo`.
+# The only changes are
+# 1. `FROM hysds/dev:latest as isce-builder`
+# 2. `python=3.7` under the conda install line 31
+# 3. `software/isce2` directory instead of `.` under `copy repo`.
+# If the build fails, make sure the dockefile content is update-to-date
 FROM hysds/dev:latest as isce-builder
 
 # Set an encoding to make things work smoothly.
@@ -24,6 +28,7 @@ RUN set -ex \
 RUN set -ex \
  && . /opt/conda/bin/activate root \
  && conda install --yes \
+      python=3.7 \
       cython \
       gdal \
       git \
@@ -82,6 +87,7 @@ RUN set -ex \
       --prefix=/ --version=2.3 --provides=isce \
       --maintainer=piyush.agram@jpl.nasa.gov \
       --description="InSAR Scientific Computing Environment v2 (${hash})"
+
 
 ##################################################################################################################
 
@@ -180,11 +186,15 @@ RUN apt install -y --no-install-recommends \
     libxm4 \
     libgdal-dev
 
-RUN ln -s /usr/lib/libgdal.so /usr/lib/libgdal.so.20 \
-    && ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.101 \
+RUN conda install gdal==3.0.2
+
+#RUN ln -s /usr/lib/libgdal.so /usr/lib/libgdal.so.20 \
+#    && ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.101 \
+#    && ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.10
+RUN ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.101 \
     && ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.10
 
-RUN pip install 'numpy' 'h5py' 'scipy' 'gdal==3.0.2'
+RUN pip install 'numpy' 'h5py' 'scipy'
 
 COPY --from=isce-builder /tmp/isce-2.3-1.x86_64.rpm /tmp/isce-2.3-1.x86_64.rpm
 
@@ -200,6 +210,11 @@ RUN chmod 755 $ISCE_HOME/applications/*
 
 # Install after ISCE because of possible conflicts
 RUN apt install -y libgfortran3 gfortran
+
+# A few tests
+RUN python /opt/isce2/isce/applications/topsApp.py --help
+RUN python -c "import isce; print(isce.__version__)"
+RUN python -c "from isce.applications import topsApp"  
 
 # ---------------------------------------------------------------------------------------------------------------
 # Install SNAP 7.0
