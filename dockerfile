@@ -188,10 +188,8 @@ RUN apt install -y --no-install-recommends \
 
 RUN conda install gdal==3.0.2
 
-#RUN ln -s /usr/lib/libgdal.so /usr/lib/libgdal.so.20 \
-#    && ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.101 \
-#    && ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.10
-RUN ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.101 \
+RUN ln -s /usr/lib/libgdal.so /usr/lib/libgdal.so.20 \
+    && ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.101 \
     && ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.10
 
 RUN pip install 'numpy' 'h5py' 'scipy'
