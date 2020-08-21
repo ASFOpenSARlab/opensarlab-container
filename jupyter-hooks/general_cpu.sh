@@ -1,3 +1,8 @@
+#!/bin/bash
+set -e
+
+python resource_checks/check_storage.py $1
+
 pip install --user \
     nbgitpuller \
     ipywidgets \

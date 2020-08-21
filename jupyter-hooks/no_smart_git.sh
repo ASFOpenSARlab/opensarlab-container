@@ -1,3 +1,8 @@
+#!/bin/bash
+set -e
+
+python resource_checks/check_storage.py
+
 pip install --user \
     ipywidgets \
     mpldatacursor \
