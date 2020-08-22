@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-python resource_checks/check_storage.py
+python /etc/jupyter-hooks/resource_checks/check_storage.py
 
 pip install --user \
     ipywidgets \
@@ -21,6 +21,6 @@ jupyter nbextension install --py hide_code --user
 jupyter nbextension enable --py hide_code --user
 jupyter serverextension enable --py hide_code --user
 
-cp custom_magics/00-df.py /home/jovyan/.ipython/profile_default/startup/00-df.py
+cp /etc/jupyter-hooks/custom_magics/00-df.py /home/jovyan/.ipython/profile_default/startup/00-df.py
 
 echo 'No git puller enabled.'
