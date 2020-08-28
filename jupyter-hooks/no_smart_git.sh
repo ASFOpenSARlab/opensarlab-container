@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-python /etc/jupyter-hooks/resource_checks/check_storage.py $1
-
 pip install --user \
     ipywidgets \
     mpldatacursor \
