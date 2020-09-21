@@ -212,7 +212,10 @@ RUN apt install -y libgfortran3 gfortran
 # A few tests for largely possible debugging, make errors as warnings 
 RUN python /opt/isce2/isce/applications/topsApp.py --help ; exit 0
 RUN python -c "import isce; print(isce.__version__)" ; exit 0
-RUN python -c "from isce.applications import topsApp" ; exit 0  
+RUN python -c "from isce.applications import topsApp" ; exit 0
+
+# So that users can temporarily add items to ISCE
+RUN chown -R jovyan:root /opt/isce2
 
 # ---------------------------------------------------------------------------------------------------------------
 # Install SNAP 7.0
@@ -356,5 +359,8 @@ RUN addgroup -gid 599 elevation \
 COPY jupyter-hooks /etc/jupyter-hooks
 RUN chmod -R 755 /etc/jupyter-hooks && \
     chown -R jovyan:users /etc/jupyter-hooks
+
+# So that users can temporarily install conda packages and avoid a special environment
+RUN chown -R jovyan:root /opt/conda
 
 USER jovyan
