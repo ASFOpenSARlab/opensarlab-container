@@ -1,4 +1,4 @@
-FROM jupyter/minimal-notebook:dc9744740e12 as general_cpu-stage
+FROM base-stage:1.0 as general_cpu-stage
 
 # Start
 COPY --from=start-stage:1.0 / /

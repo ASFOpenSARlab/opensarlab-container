@@ -1,6 +1,13 @@
 
+cd isce-native
+STAGE_VERSION=1.0 PROFILE=jupyterhub bash build.sh
+cd ..
+
+cd base-stage
+STAGE_VERSION=1.0 PROFILE=jupyterhub bash build.sh
+cd ..
+
 for j in \
-    base \
     start \
     aria \
     finale \
@@ -16,7 +23,3 @@ do
     STAGE_VERSION=1.0 PROFILE=jupyterhub bash build.sh
     cd ..
 done
-
-cd isce-native
-STAGE_VERSION=1.0 PROFILE=jupyterhub bash build.sh
-cd ..
