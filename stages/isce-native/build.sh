@@ -1,6 +1,4 @@
 
-terhub
-
 if [ ! -d isce2 ] ; then
     git clone -b main --single-branch https://github.com/isce-framework/isce2.git isce2
 fi

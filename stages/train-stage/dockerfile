@@ -1,7 +1,7 @@
-FROM base-stage as train-stage 
+FROM base-stage:1.0 as train-stage 
 
 # hyp3-lib
-COPY --from=hyp3lib-stage / /
+COPY --from=hyp3lib-stage:1.0 / /
 
 RUN pip install 'numpy' 'netCDF4' 'scipy>=0.18.1' 'gdal>=3.0.2'
 

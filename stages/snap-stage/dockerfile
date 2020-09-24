@@ -1,4 +1,4 @@
-FROM base-stage as snap-stage
+FROM base-stage:1.0 as snap-stage
 
 RUN apt install --no-install-recommends -y \
     default-jdk-headless

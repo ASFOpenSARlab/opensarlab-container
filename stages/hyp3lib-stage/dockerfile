@@ -1,4 +1,4 @@
-FROM base-stage as hyp3lib-stage
+FROM base-stage:1.0 as hyp3lib-stage
 
 RUN apt install --no-install-recommends -y \
     gdal-bin

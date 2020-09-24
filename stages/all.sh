@@ -16,3 +16,7 @@ do
     STAGE_VERSION=1.0 PROFILE=jupyterhub bash build.sh
     cd ..
 done
+
+cd isce-native
+STAGE_VERSION=1.0 PROFILE=jupyterhub bash build.sh
+cd ..

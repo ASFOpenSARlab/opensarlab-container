@@ -1,4 +1,4 @@
-FROM base-stage as finale-stage
+FROM base-stage:1.0 as finale-stage
 
 # Install any other custom and jupyter libaries like widgets
 # Use pip (conda version) since we want to corner off GIAnT's work and also run it with Jupyter

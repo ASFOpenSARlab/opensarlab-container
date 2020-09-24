@@ -1,4 +1,4 @@
-FROM base-stage as mintpy-stage
+FROM base-stage:1.0 as mintpy-stage
 
 ENV MINTPY_HOME=/usr/local/MintPy
 ENV PYAPS_HOME=/usr/local/PyAPS

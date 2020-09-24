@@ -1,4 +1,4 @@
-FROM base-stage as aria-stage 
+FROM base-stage:1.0 as aria-stage 
 
 ENV ARIA_TOOLS_HOME=/usr/local/ARIA-tools
 ENV ARIA_TOOLS_DOCS_HOME=/usr/local/ARIA-tools-docs

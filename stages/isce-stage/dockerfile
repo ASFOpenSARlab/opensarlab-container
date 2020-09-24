@@ -1,4 +1,4 @@
-FROM base-stage as isce-stage
+FROM base-stage:1.0 as isce-stage
 
 ENV ISCE_HOME /opt/isce2/isce/
 ENV PYTHONPATH $PYTHONPATH:/opt/isce2
