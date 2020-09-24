@@ -13,6 +13,6 @@ for j in \
     train
 do 
     cd $j-stage
-    bash build.sh
+    STAGE_VERSION=1.0 PROFILE=jupyterhub bash build.sh
     cd ..
 done

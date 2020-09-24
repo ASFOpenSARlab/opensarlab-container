@@ -1,7 +1,7 @@
 
 set -e
 
-VERSION=1.0
+
 
 if [ ! -d ARIA-tools ] ; then
     git clone -b v1.1.1 --single-branch https://github.com/aria-tools/ARIA-tools.git ARIA-tools
@@ -12,6 +12,6 @@ fi
 
 # Build
 time docker build -f dockerfile -t aria-stage:test --target aria-stage-test .
-time docker build -f dockerfile -t aria-stage:$VERSION --target aria-stage .
+time docker build -f dockerfile -t aria-stage:$STAGE_VERSION --target aria-stage .
 
 # Push image to registry
