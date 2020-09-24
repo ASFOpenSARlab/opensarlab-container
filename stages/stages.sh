@@ -4,11 +4,12 @@ set -e
 profile=jupyterhub
 echo "Using AWS profile '$profile'"
 
-function GENERAL {
+function START {
     VERSION=1.0
 
     # Build
-    time docker build -f stages.dockerfile -t general:$VERSION --target general-stage .
+    time docker build -f stages.dockerfile -t start:test --target start-test .
+    time docker build -f stages.dockerfile -t start:$VERSION --target start-stage .
 
     # Push image to registry
 }
@@ -18,13 +19,13 @@ function MAPREADY {
     VERSION=1.0
 
     # Download 
-    profile=jupyterhub
-    if [ ! -d ASF_MapReady ] ; then
+    if [ ! -d mapready-build ] ; then
         aws s3 sync --exclude '*' --include 'mapready-u18.zip' s3://asf-jupyter-software/ . --profile=$profile
         unzip mapready-u18.zip
+        rm mapready-u18.zip 
     fi
 
-    #time docker build -f stages.dockerfile -t mapready:test --target mapready-test .
+    time docker build -f stages.dockerfile -t mapready:test --target mapready-test .
     time docker build -f stages.dockerfile -t mapready:$VERSION --target mapready-stage .
 
     # Push image to registry

@@ -277,8 +277,23 @@ USER jovyan
 
 ##########################################
 ##########################################
+##########################################
 
-FROM isce-build as isce-test
+FROM start-stage as start-test
+
+RUN echo "Testing starting stage"
+
+##########################################
+
+FROM mapready-stage as mapready-test 
+
+RUN echo "Testing mapready"
+
+##########################################
+
+FROM isce-stage as isce-test
+
+RUN echo "Testing isce"
 
 # A few tests for largely possible debugging, make errors as warnings 
 RUN python3.7 $ISCE_HOME/applications/topsApp.py --help ; exit 0
@@ -286,3 +301,39 @@ RUN python3.7 -c "import isce; print(isce.__version__)" ; exit 0
 RUN python3.7 -c "from isce.applications import topsApp" ; exit 0
 
 RUN gdalinfo --help
+
+##########################################
+
+FROM snap-stage as snap-test 
+
+RUN echo "Testing snap"
+
+##########################################
+
+RUN aria-stage as aria-test 
+
+RUN echo "Testing aria"
+
+##########################################
+
+FROM mintpy-stage as mintpy-test 
+
+RUN echo "Testing mintpy"
+
+##########################################
+
+FROM train-stage as train-test 
+
+RUN echo "Testing train"
+
+##########################################
+
+FROM giant-stage as giant-test 
+
+RUN echo "Testing giant"
+
+##########################################
+
+FROM finale-stage as finale-test 
+
+RUN echo "Testing finale"
