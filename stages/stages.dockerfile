@@ -1,13 +1,11 @@
 
-FROM jupyter/minimal-notebook:dc9744740e12
-LABEL MAINTAINER="Alaska Satellite Facility"
+FROM jupyter/minimal-notebook:dc9744740e12 as base 
 
-# By default, the notebook base image is set to non-sudo user joyvan. This makes root-ful actions difficult.
 USER root
 
-# Pip is ran under /opt/conda/lib/python3.6/site-packages/pip.
-# Pip3 is ran under /usr/lib/python3.6/dist-packages.
-# Pip2 is ran under /usr/lib/python2.7/dist-packages. Choose wisely.
+##########################################
+
+FROM base as general-stage
 
 # Manually update nbconvert. A dicrepancy in the versioning causes a 500 when opening a notebook. https://github.com/jupyter/notebook/issues/3629#issuecomment-399408222
 # Remember, here pip is updating within the condas namespace where jupyter notebook items are held.
@@ -40,9 +38,10 @@ RUN apt update && \
 
 RUN pip install 'awscli' 'boto3>=1.4.4' 'pyyaml>=3.12' 'matplotlib==3.1.3' 'bokeh'
 
+##########################################
 
-# ---------------------------------------------------------------------------------------------------------------
-# Install MapReady
+FROM base as mapready-stage 
+
 RUN apt update && \
     apt install --no-install-recommends -y \
     pkg-config \
@@ -70,19 +69,55 @@ RUN apt update && \
 
 ENV MAPREADY_HOME /usr/local/mapready/
 
-COPY software/mapready-build/bin/* $MAPREADY_HOME/bin/
-COPY software/mapready-build/doc/* $MAPREADY_HOME/doc/
-COPY software/mapready-build/lib/* $MAPREADY_HOME/lib/
-COPY software/mapready-build/man/* $MAPREADY_HOME/man/
-COPY software/mapready-build/share/* $MAPREADY_HOME/share/
+COPY mapready-build/bin/* $MAPREADY_HOME/bin/
+COPY mapready-build/doc/* $MAPREADY_HOME/doc/
+COPY mapready-build/lib/* $MAPREADY_HOME/lib/
+COPY mapready-build/man/* $MAPREADY_HOME/man/
+COPY mapready-build/share/* $MAPREADY_HOME/share/
 
 ENV PATH $PATH:$MAPREADY_HOME/bin/:$MAPREADY_HOME/lib/:$MAPREADY_HOME/share/
 
-# ---------------------------------------------------------------------------------------------------------------
-# Install ISCE.
+##########################################
 
-# ---------------------------------------------------------------------------------------------------------------
-# Install SNAP 7.0
+FROM base as isce-stage
+
+ENV ISCE_HOME /opt/isce2/isce/
+ENV PYTHONPATH $PYTHONPATH:/opt/isce2
+ENV PATH $PATH:$ISCE_HOME/bin:$ISCE_HOME/applications
+
+RUN apt update -y
+RUN apt install -y --no-install-recommends \
+    gdal-bin \
+    gfortran-4.8 \
+    libfftw3-dev \
+    libxm4 \
+    libgdal-dev
+
+RUN conda install gdal==3.0.2
+
+#RUN ln -s /usr/lib/libgdal.so /usr/lib/libgdal.so.20
+RUN ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.101
+RUN ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.10
+
+RUN pip install 'numpy' 'h5py' 'scipy'
+
+COPY --from=isce-native:1.0 /opt/isce2/isce $ISCE_HOME
+
+# Add extra files to ISCE
+COPY topo.py $ISCE_HOME/applications/
+COPY unpackFrame_ALOS_raw.py $ISCE_HOME/applications/
+RUN chmod 755 $ISCE_HOME/applications/*
+
+# So that users can temporarily add items to ISCE
+RUN chown -R jovyan:root $ISCE_HOME
+
+# Install after ISCE because of possible conflicts
+#RUN apt install -y libgfortran3 gfortran
+
+##########################################
+
+FROM base as snap-stage
+
 RUN apt update && \
     apt install --no-install-recommends -y \
     default-jdk-headless
@@ -100,9 +135,68 @@ COPY software/gpt.vmoptions /usr/local/snap/bin/gpt.vmoptions
 
 RUN rm -rf /tmp/build/
 
-# ---------------------------------------------------------------------------------------------------------------
-# Install GIAnT (which only runs in python 2)
-# Some of these might not be needed but the thing works.
+##########################################
+
+FROM base as aria-stage 
+
+ENV ARIA_TOOLS_HOME=/usr/local/ARIA-tools
+ENV ARIA_TOOLS_DOCS_HOME=/usr/local/ARIA-tools-docs
+
+# Tools
+COPY software/ARIA-tools ${ARIA_TOOLS_HOME}
+RUN pip install 'shapely' 'joblib' && \
+    cd ${ARIA_TOOLS_HOME} && \
+    python setup.py install && \
+    cd /
+
+# Docs
+COPY software/ARIA-tools-docs ${ARIA_TOOLS_DOCS_HOME}
+
+##########################################
+
+FROM base as mintpy-stage
+
+ENV MINTPY_HOME=/usr/local/MintPy
+ENV PYAPS_HOME=/usr/local/PyAPS
+ENV PATH=${PATH}:${MINTPY_HOME}/mintpy:${MINTPY_HOME}/sh
+ENV PYTHONPATH=${PYTHONPATH}:${MINTPY_HOME}:${PYAPS_HOME}
+ENV PROJ_LIB=/usr/share/proj
+
+# Pull and config mintpy and pyaps
+COPY software/MintPy ${MINTPY_HOME}
+COPY software/PyAPS ${PYAPS_HOME}/pyaps3
+
+RUN apt install -y cython3 proj-bin libgeos-3.6.2 libgeos-dev libproj-dev
+RUN pip install 'cdsapi' 'cvxopt' 'dask[complete]>=1.0,<2.0' 'dask-jobqueue>=0.3,<1.0' cython \
+    'h5py' 'lxml' 'matplotlib==3.1.3' 'netcdf4' 'numpy' 'pyproj' 'pykdtree' 'pyresample' 'scikit-image' 'scipy'
+RUN pip install git+https://github.com/SciTools/cartopy.git --no-binary cartopy  # dev version
+RUN pip install pykml -e git+https://github.com/yunjunz/pykml.git#egg=pykml
+
+##########################################
+
+FROM base as hyp3lib-stage
+
+RUN apt update && \
+    apt install -y gdal-bin
+
+RUN pip install hyp3lib
+
+##########################################
+
+FROM base as train-stage 
+
+# hyp3-lib
+COPY --from=hyp3lib-stage / /
+
+RUN pip install 'numpy' 'netCDF4' 'scipy>=0.18.1' 'gdal>=3.0.2'
+
+COPY software/TRAIN/ /usr/local/TRAIN/
+ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
+
+##########################################
+
+FROM base as giant-stage
+
 RUN apt update && \
     apt install --no-install-recommends -y \
     build-essential \
@@ -144,59 +238,10 @@ ENV PYTHONPATH $PYTHONPATH:/usr/local/GIAnT:/usr/local/GIAnT/SCR:/usr/local/GIAn
 
 COPY software/prepdataxml.py /usr/local/GIAnT/prepdataxml.py
 
+##########################################
 
-# ---------------------------------------------------------------------------------------------------------------
-# Install hyp3-lib
-# Prereq for TRAIN
-RUN apt update && \
-    apt install -y gdal-bin
+FROM base as finale-stage
 
-RUN pip install hyp3lib
-
-# ---------------------------------------------------------------------------------------------------------------
-# Install TRAIN (python 3 version)
-RUN pip install 'numpy' 'netCDF4' 'scipy>=0.18.1' 'gdal>=3.0.2'
-
-COPY software/TRAIN/ /usr/local/TRAIN/
-ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
-
-
-# ---------------------------------------------------------------------------------------------------------------
-# Install MintPy
-
-ENV MINTPY_HOME=/usr/local/MintPy
-ENV PYAPS_HOME=/usr/local/PyAPS
-ENV PATH=${PATH}:${MINTPY_HOME}/mintpy:${MINTPY_HOME}/sh
-ENV PYTHONPATH=${PYTHONPATH}:${MINTPY_HOME}:${PYAPS_HOME}
-ENV PROJ_LIB=/usr/share/proj
-
-# Pull and config mintpy and pyaps
-COPY software/MintPy ${MINTPY_HOME}
-COPY software/PyAPS ${PYAPS_HOME}/pyaps3
-
-RUN apt install -y cython3 proj-bin libgeos-3.6.2 libgeos-dev libproj-dev
-RUN pip install 'cdsapi' 'cvxopt' 'dask[complete]>=1.0,<2.0' 'dask-jobqueue>=0.3,<1.0' cython \
-    'h5py' 'lxml' 'matplotlib==3.1.3' 'netcdf4' 'numpy' 'pyproj' 'pykdtree' 'pyresample' 'scikit-image' 'scipy'
-RUN pip install git+https://github.com/SciTools/cartopy.git --no-binary cartopy  # dev version
-RUN pip install pykml -e git+https://github.com/yunjunz/pykml.git#egg=pykml
-
-# ---------------------------------------------------------------------------------------------------------------
-# Install ARIA Tools and Docs
-
-ENV ARIA_TOOLS_HOME=/usr/local/ARIA-tools
-ENV ARIA_TOOLS_DOCS_HOME=/usr/local/ARIA-tools-docs
-
-# Tools
-COPY software/ARIA-tools ${ARIA_TOOLS_HOME}
-RUN pip install 'shapely' 'joblib' && \
-    cd ${ARIA_TOOLS_HOME} && \
-    python setup.py install && \
-    cd /
-
-# Docs
-COPY software/ARIA-tools-docs ${ARIA_TOOLS_DOCS_HOME}
-
-# ---------------------------------------------------------------------------------------------------------------
 # Install any other custom and jupyter libaries like widgets
 # Use pip (conda version) since we want to corner off GIAnT's work and also run it with Jupyter
 RUN pip install asf-hyp3
@@ -228,3 +273,15 @@ RUN chmod -R 755 /etc/jupyter-hooks && \
 RUN chown -R jovyan:root /opt/conda
 
 USER jovyan
+
+##########################################
+##########################################
+
+FROM isce-build as isce-test
+
+# A few tests for largely possible debugging, make errors as warnings 
+RUN python3.7 $ISCE_HOME/applications/topsApp.py --help ; exit 0
+RUN python3.7 -c "import isce; print(isce.__version__)" ; exit 0
+RUN python3.7 -c "from isce.applications import topsApp" ; exit 0
+
+RUN gdalinfo --help
