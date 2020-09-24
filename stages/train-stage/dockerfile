@@ -1,0 +1,14 @@
+FROM base-stage as train-stage 
+
+# hyp3-lib
+COPY --from=hyp3lib-stage / /
+
+RUN pip install 'numpy' 'netCDF4' 'scipy>=0.18.1' 'gdal>=3.0.2'
+
+COPY TRAIN/ /usr/local/TRAIN/
+ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
+
+
+FROM train-stage as train-stage-test 
+
+RUN echo "Testing train"

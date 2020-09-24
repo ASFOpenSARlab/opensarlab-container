@@ -1,0 +1,22 @@
+FROM base-stage as snap-stage
+
+RUN apt install --no-install-recommends -y \
+    default-jdk-headless
+
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
+ENV PATH $PATH:/usr/lib/jvm/java-11-openjdk-amd64/bin
+
+RUN mkdir -p /tmp/build/snap
+COPY esa-snap_sentinel_unix_7_0.sh /tmp/build/snap/esa-snap_sentinel_unix_7_0.sh
+COPY snap_install_7_0.varfile /tmp/build/snap/snap_install_7_0.varfile
+
+# The build script will create a /usr/local/snap directory
+RUN sh /tmp/build/snap/esa-snap_sentinel_unix_7_0.sh -q -varfile /tmp/build/snap/snap_install_7_0.varfile
+COPY gpt.vmoptions /usr/local/snap/bin/gpt.vmoptions
+
+RUN rm -rf /tmp/build/
+
+
+FROM snap-stage as snap-stage-test 
+
+RUN echo "Testing snap"

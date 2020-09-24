@@ -1,0 +1,8 @@
+FROM base-stage as hyp3lib-stage
+
+RUN apt install --no-install-recommends -y \
+    gdal-bin
+
+RUN pip install hyp3lib
+
+FROM hyp3lib-stage as hyp3lib-stage-test

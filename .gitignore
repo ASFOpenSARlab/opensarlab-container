@@ -1,9 +1,0 @@
-software/*
-!software/download.sh
-!software/get_dem.py.cfg
-
-stages/**
-!stages/general_cpu.dockerfile
-!stages/general_cpu.sh
-!stages/stages.dockerfile
-!stages/stages.sh 

@@ -1,0 +1,46 @@
+FROM base-stage as giant-stage
+
+RUN apt install --no-install-recommends -y \
+    build-essential \
+    gfortran \
+    zlibc \
+    zlib1g-dev \
+    libpng-dev \
+    libopenjp2-7-dev \
+    environment-modules \
+    libopenblas-dev \
+    libfreetype6-dev \
+    pkg-config \
+    cython \
+    ipython \
+    python-pip \
+    python-numpy \
+    python-scipy \
+    python-numexpr \
+    python-setuptools \
+    python-distutils-extra \
+    python-matplotlib \
+    python-h5py \
+    python-pyproj \
+    python-mpltoolkits.basemap \
+    python-lxml \
+    python-requests \
+    python-pyshp \
+    python-shapely \
+    python-pywt \
+    python-simplejson \
+    python-netcdf4 \
+    python-pyresample
+
+RUN pip2 install 'scipy==0.18.1' 'matplotlib==1.4.3' 'pykml' 'gdal==3.0.2'
+
+COPY GIAnT/ /usr/local/GIAnT/
+RUN cd /usr/local/GIAnT/ && python2.7 setup.py build_ext && cd /
+ENV PYTHONPATH $PYTHONPATH:/usr/local/GIAnT:/usr/local/GIAnT/SCR:/usr/local/GIAnT/tsinsar:/usr/local/GIAnT/examples:/usr/local/GIAnT/geocode:/usr/local/GIAnT/solver
+
+COPY prepdataxml.py /usr/local/GIAnT/prepdataxml.py
+
+
+FROM giant-stage as giant-stage-test 
+
+RUN echo "Testing giant"

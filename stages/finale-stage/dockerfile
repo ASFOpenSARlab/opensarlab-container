@@ -1,0 +1,36 @@
+FROM base-stage as finale-stage
+
+# Install any other custom and jupyter libaries like widgets
+# Use pip (conda version) since we want to corner off GIAnT's work and also run it with Jupyter
+RUN pip install asf-hyp3
+RUN conda install -c conda-forge jupyter_contrib_nbextensions -y
+
+# Remove 'LaTeX' options and all custom exporters in download menu
+RUN sed -i '/LaTeX/d' /opt/conda/lib/python3.7/site-packages/notebook/templates/notebook.html && \
+    sed -i '/exporter\.display/d' /opt/conda/lib/python3.7/site-packages/notebook/templates/notebook.html
+
+# Remove unneeded packages to free up a few hundred MB
+# Remove apt list to save a little room (though it probably doesn't matter as much since the image is already really big)
+# Make sure that any files in the home directory are jovyan permission
+RUN rm -rf /var/lib/apt/lists/* && \
+    apt autoremove -y && \
+    chown -R jovyan:users /home/jovyan/
+
+# Add sudo group user 599 elevation
+RUN addgroup -gid 599 elevation \
+    && echo '%elevation ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+
+# Add jupyter hooks
+COPY jupyter-hooks /etc/jupyter-hooks
+RUN chmod -R 755 /etc/jupyter-hooks && \
+    chown -R jovyan:users /etc/jupyter-hooks
+
+# So that users can temporarily install conda packages and avoid a special environment
+RUN chown -R jovyan:root /opt/conda
+
+USER jovyan
+
+
+FROM finale-stage as finale-stage-test 
+
+RUN echo "Testing finale"

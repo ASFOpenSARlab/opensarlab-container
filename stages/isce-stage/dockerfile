@@ -1,0 +1,45 @@
+FROM base-stage as isce-stage
+
+ENV ISCE_HOME /opt/isce2/isce/
+ENV PYTHONPATH $PYTHONPATH:/opt/isce2
+ENV PATH $PATH:$ISCE_HOME/bin:$ISCE_HOME/applications
+
+RUN apt install --no-install-recommends -y \
+    gdal-bin \
+    gfortran-4.8 \
+    libfftw3-dev \
+    libxm4 \
+    libgdal-dev
+
+RUN conda install gdal==3.0.2
+
+#RUN ln -s /usr/lib/libgdal.so /usr/lib/libgdal.so.20
+RUN ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.101
+RUN ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.10
+
+RUN pip install 'numpy' 'h5py' 'scipy'
+
+COPY --from=isce-native:1.0 /opt/isce2/isce $ISCE_HOME
+
+# Add extra files to ISCE
+COPY topo.py $ISCE_HOME/applications/
+COPY unpackFrame_ALOS_raw.py $ISCE_HOME/applications/
+RUN chmod 755 $ISCE_HOME/applications/*
+
+# So that users can temporarily add items to ISCE
+RUN chown -R jovyan:root $ISCE_HOME
+
+# Install after ISCE because of possible conflicts
+#RUN apt install -y libgfortran3 gfortran
+
+
+FROM isce-stage as isce-stage-test
+
+RUN echo "Testing isce"
+
+# A few tests for largely possible debugging, make errors as warnings 
+RUN python3.7 $ISCE_HOME/applications/topsApp.py --help ; exit 0
+RUN python3.7 -c "import isce; print(isce.__version__)" ; exit 0
+RUN python3.7 -c "from isce.applications import topsApp" ; exit 0
+
+RUN gdalinfo --help
