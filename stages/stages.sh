@@ -1,4 +1,9 @@
 
+set -e 
+
+profile=jupyterhub
+echo "Using AWS profile '$profile'"
+
 function GENERAL {
     VERSION=1.0
 
@@ -10,15 +15,14 @@ function GENERAL {
 
 function MAPREADY {
 
+    VERSION=1.0
+
     # Download 
     profile=jupyterhub
     if [ ! -d ASF_MapReady ] ; then
         aws s3 sync --exclude '*' --include 'mapready-u18.zip' s3://asf-jupyter-software/ . --profile=$profile
         unzip mapready-u18.zip
     fi
-
-    # Build
-    VERSION=1.0
 
     #time docker build -f stages.dockerfile -t mapready:test --target mapready-test .
     time docker build -f stages.dockerfile -t mapready:$VERSION --target mapready-stage .
@@ -42,7 +46,6 @@ function SNAP {
 
     VERSION=1.0
 
-    profile=jupyterhub
     if [ ! -f esa-snap_sentinel_unix_7_0.sh ] ; then
         aws s3 sync --exclude '*' --include 'esa-snap_sentinel_unix_7_0.sh' s3://asf-jupyter-software/ . --profile=$profile
     fi
@@ -62,58 +65,79 @@ function SNAP {
 
 function ARIA {
 
-echo "Downloading ARIA-Tools"
-if [ ! -d ARIA-tools ] ; then
-    git clone -b v1.1.1 --single-branch https://github.com/aria-tools/ARIA-tools.git ARIA-tools
-fi
+    VERSION=1.0
 
-echo "Downloading ARIA-Docs"
-if [ ! -d ARIA-tools-docs ] ; then
-    git clone -b master --single-branch https://github.com/aria-tools/ARIA-tools-docs.git ARIA-tools-docs
-fi
+    if [ ! -d ARIA-tools ] ; then
+        git clone -b v1.1.1 --single-branch https://github.com/aria-tools/ARIA-tools.git ARIA-tools
+    fi
+    if [ ! -d ARIA-tools-docs ] ; then
+        git clone -b master --single-branch https://github.com/aria-tools/ARIA-tools-docs.git ARIA-tools-docs
+    fi
 
+    # Build
+    time docker build -f stages.dockerfile -t aria:test --target aria-test .
+    time docker build -f stages.dockerfile -t aria:$VERSION --target aria-stage .
+
+    # Push image to registry
 }
 
 function MINTPY {
 
-if [ ! -d MintPy ] ; then
-    git clone -b v1.2.2 --single-branch https://github.com/insarlab/MintPy.git
-fi
+    VERSION=1.0
 
-if [ ! -d PyAPS ] ; then
-    git clone -b master --single-branch https://github.com/yunjunz/pyaps3.git PyAPS
-fi
+    if [ ! -d MintPy ] ; then
+        git clone -b v1.2.2 --single-branch https://github.com/insarlab/MintPy.git
+    fi
+    if [ ! -d PyAPS ] ; then
+        git clone -b master --single-branch https://github.com/yunjunz/pyaps3.git PyAPS
+    fi
+
+    # Build
+    time docker build -f stages.dockerfile -t mintpy:test --target mintpy-test .
+    time docker build -f stages.dockerfile -t mintpy:$VERSION --target mintpy-stage .
+
+    # Push image to registry
 
 }
 
 function TRAIN {
 
-if [ ! -d TRAIN ] ; then
-    git clone -b OpenSARlab --single-branch https://github.com/asfadmin/hyp3-TRAIN.git TRAIN
-fi
+    VERSION=1.0
 
+    if [ ! -d TRAIN ] ; then
+        git clone -b OpenSARlab --single-branch https://github.com/asfadmin/hyp3-TRAIN.git TRAIN
+    fi
+
+    # Build
+    time docker build -f stages.dockerfile -t train:test --target train-test .
+    time docker build -f stages.dockerfile -t train:$VERSION --target train-stage .
+
+    # Push image to registry
 }
 
 function GIANT {
 
-if [ ! -d GIAnT ] ; then
-    aws s3 sync --exclude '*' --include 'GIAnT.zip' s3://asf-jupyter-software/ . --profile=$profile
-    unzip GIAnT.zip
-fi
+    VERSION=1.0
 
-aws s3 sync --exclude '*' --include 'prepdataxml.py' s3://asf-jupyter-software/ . --profile=$profile
+    if [ ! -d GIAnT ] ; then
+        aws s3 sync --exclude '*' --include 'GIAnT.zip' s3://asf-jupyter-software/ . --profile=$profile
+        unzip GIAnT.zip
+    fi
+    if [ ! -f prepdataxml.py ] ; then
+        aws s3 sync --exclude '*' --include 'prepdataxml.py' s3://asf-jupyter-software/ . --profile=$profile
+    fi 
 
+    # Build
+    time docker build -f stages.dockerfile -t giant:test --target giant-test .
+    time docker build -f stages.dockerfile -t giant:$VERSION --target giant-stage .
+
+    # Push image to registry
 }
 
 function ISCE_NATIVE {
 
-    set -e
+    VERSION=1.0
 
-    profile=jupyterhub
-    echo "Using AWS profile '$profile'"
-
-    # Download software
-    echo "Downloading isce2...."
     if [ ! -d isce2 ] ; then
         git clone -b main --single-branch https://github.com/isce-framework/isce2.git isce2
     fi
@@ -126,14 +150,11 @@ function ISCE_NATIVE {
         aws s3 sync --exclude '*' --include 'unpackFrame_ALOS_raw.py' s3://asf-jupyter-software/ . --profile=$profile
     fi
 
-    VERSION=1.0
-
     # Build ISCE
     time docker build -f isce2/docker/Dockerfile -t isce-native:$VERSION isce2/
 
     ## Push image to registry
     #docker push isce-builder:latest here
-
 } 
 
 $1

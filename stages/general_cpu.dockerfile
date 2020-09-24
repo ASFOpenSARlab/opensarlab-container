@@ -1,7 +1,7 @@
 FROM jupyter/minimal-notebook:dc9744740e12 as general_cpu-stage
 
-# General
-COPY --from=general:1.0 / /
+# Start
+COPY --from=start:1.0 / /
 
 # Isce
 ENV ISCE_HOME /opt/isce2/isce/
@@ -18,6 +18,30 @@ COPY --from=mapready:1.0 / /
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 ENV PATH $PATH:/usr/lib/jvm/java-11-openjdk-amd64/bin
 COPY --from=snap:1.0 / /
+
+# ARIA
+ENV ARIA_TOOLS_HOME=/usr/local/ARIA-tools
+ENV ARIA_TOOLS_DOCS_HOME=/usr/local/ARIA-tools-docs
+COPY --from=aria:1.0 / /
+
+# MintPy
+ENV MINTPY_HOME=/usr/local/MintPy
+ENV PYAPS_HOME=/usr/local/PyAPS
+ENV PATH=${PATH}:${MINTPY_HOME}/mintpy:${MINTPY_HOME}/sh
+ENV PYTHONPATH=${PYTHONPATH}:${MINTPY_HOME}:${PYAPS_HOME}
+ENV PROJ_LIB=/usr/share/proj
+COPY --from=mintpy:1.0 / /
+
+# Train
+ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
+COPY --from=train:1.0 / /
+
+# Giant 
+ENV PYTHONPATH $PYTHONPATH:/usr/local/GIAnT:/usr/local/GIAnT/SCR:/usr/local/GIAnT/tsinsar:/usr/local/GIAnT/examples:/usr/local/GIAnT/geocode:/usr/local/GIAnT/solver
+COPY --from=giant:1.0 / /
+
+# Finale
+COPY --from=finale:1.0 / /
 
 ##########################################
 

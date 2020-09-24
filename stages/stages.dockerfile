@@ -3,9 +3,12 @@ FROM jupyter/minimal-notebook:dc9744740e12 as base
 
 USER root
 
+# Remove over 1 GB of latex files to save space
+RUN apt remove -y texlive*
+
 ##########################################
 
-FROM base as general-stage
+FROM base as start-stage
 
 # Manually update nbconvert. A dicrepancy in the versioning causes a 500 when opening a notebook. https://github.com/jupyter/notebook/issues/3629#issuecomment-399408222
 # Remember, here pip is updating within the condas namespace where jupyter notebook items are held.
@@ -126,12 +129,12 @@ ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 ENV PATH $PATH:/usr/lib/jvm/java-11-openjdk-amd64/bin
 
 RUN mkdir -p /tmp/build/snap
-COPY software/esa-snap_sentinel_unix_7_0.sh /tmp/build/snap/esa-snap_sentinel_unix_7_0.sh
-COPY software/snap_install_7_0.varfile /tmp/build/snap/snap_install_7_0.varfile
+COPY esa-snap_sentinel_unix_7_0.sh /tmp/build/snap/esa-snap_sentinel_unix_7_0.sh
+COPY snap_install_7_0.varfile /tmp/build/snap/snap_install_7_0.varfile
 
 # The build script will create a /usr/local/snap directory
 RUN sh /tmp/build/snap/esa-snap_sentinel_unix_7_0.sh -q -varfile /tmp/build/snap/snap_install_7_0.varfile
-COPY software/gpt.vmoptions /usr/local/snap/bin/gpt.vmoptions
+COPY gpt.vmoptions /usr/local/snap/bin/gpt.vmoptions
 
 RUN rm -rf /tmp/build/
 
@@ -143,14 +146,14 @@ ENV ARIA_TOOLS_HOME=/usr/local/ARIA-tools
 ENV ARIA_TOOLS_DOCS_HOME=/usr/local/ARIA-tools-docs
 
 # Tools
-COPY software/ARIA-tools ${ARIA_TOOLS_HOME}
+COPY ARIA-tools ${ARIA_TOOLS_HOME}
 RUN pip install 'shapely' 'joblib' && \
     cd ${ARIA_TOOLS_HOME} && \
     python setup.py install && \
     cd /
 
 # Docs
-COPY software/ARIA-tools-docs ${ARIA_TOOLS_DOCS_HOME}
+COPY ARIA-tools-docs ${ARIA_TOOLS_DOCS_HOME}
 
 ##########################################
 
@@ -163,8 +166,8 @@ ENV PYTHONPATH=${PYTHONPATH}:${MINTPY_HOME}:${PYAPS_HOME}
 ENV PROJ_LIB=/usr/share/proj
 
 # Pull and config mintpy and pyaps
-COPY software/MintPy ${MINTPY_HOME}
-COPY software/PyAPS ${PYAPS_HOME}/pyaps3
+COPY MintPy ${MINTPY_HOME}
+COPY PyAPS ${PYAPS_HOME}/pyaps3
 
 RUN apt install -y cython3 proj-bin libgeos-3.6.2 libgeos-dev libproj-dev
 RUN pip install 'cdsapi' 'cvxopt' 'dask[complete]>=1.0,<2.0' 'dask-jobqueue>=0.3,<1.0' cython \
@@ -190,7 +193,7 @@ COPY --from=hyp3lib-stage / /
 
 RUN pip install 'numpy' 'netCDF4' 'scipy>=0.18.1' 'gdal>=3.0.2'
 
-COPY software/TRAIN/ /usr/local/TRAIN/
+COPY TRAIN/ /usr/local/TRAIN/
 ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
 
 ##########################################
@@ -232,11 +235,11 @@ RUN apt update && \
 
 RUN pip2 install 'scipy==0.18.1' 'matplotlib==1.4.3' 'pykml' 'gdal==3.0.2'
 
-COPY software/GIAnT/ /usr/local/GIAnT/
+COPY GIAnT/ /usr/local/GIAnT/
 RUN cd /usr/local/GIAnT/ && python2.7 setup.py build_ext && cd /
 ENV PYTHONPATH $PYTHONPATH:/usr/local/GIAnT:/usr/local/GIAnT/SCR:/usr/local/GIAnT/tsinsar:/usr/local/GIAnT/examples:/usr/local/GIAnT/geocode:/usr/local/GIAnT/solver
 
-COPY software/prepdataxml.py /usr/local/GIAnT/prepdataxml.py
+COPY prepdataxml.py /usr/local/GIAnT/prepdataxml.py
 
 ##########################################
 
@@ -247,8 +250,6 @@ FROM base as finale-stage
 RUN pip install asf-hyp3
 RUN conda install -c conda-forge jupyter_contrib_nbextensions -y
 
-# Remove over 1 GB of latex files to save space
-RUN apt remove -y texlive*
 # Remove 'LaTeX' options and all custom exporters in download menu
 RUN sed -i '/LaTeX/d' /opt/conda/lib/python3.7/site-packages/notebook/templates/notebook.html && \
     sed -i '/exporter\.display/d' /opt/conda/lib/python3.7/site-packages/notebook/templates/notebook.html
