@@ -1,4 +1,4 @@
-FROM base-stage:1.0 as aria-stage 
+FROM base-stage:1.0 as aria-stage
 
 ENV ARIA_TOOLS_HOME=/usr/local/ARIA-tools
 ENV ARIA_TOOLS_DOCS_HOME=/usr/local/ARIA-tools-docs
@@ -14,6 +14,6 @@ RUN pip install 'shapely' 'joblib' && \
 COPY ARIA-tools-docs ${ARIA_TOOLS_DOCS_HOME}
 
 
-RUN aria-stage as aria-stage-test 
+FROM aria-stage as aria-stage-test 
 
 RUN echo "Testing aria"

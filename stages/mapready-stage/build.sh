@@ -1,5 +1,5 @@
 
-terhub 
+set -e
 
 # Download 
 if [ ! -d mapready-build ] ; then

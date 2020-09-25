@@ -32,6 +32,8 @@ RUN apt install --no-install-recommends -y \
     python-netcdf4 \
     python-pyresample
 
+RUN conda install gdal==3.0.2
+
 RUN pip2 install 'scipy==0.18.1' 'matplotlib==1.4.3' 'pykml' 'gdal==3.0.2'
 
 COPY GIAnT/ /usr/local/GIAnT/

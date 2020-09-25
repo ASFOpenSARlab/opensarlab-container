@@ -12,7 +12,6 @@ for j in \
     aria \
     finale \
     giant \
-    hyp3lib \
     isce \
     mapready \
     mintpy \

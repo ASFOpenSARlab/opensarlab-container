@@ -1,9 +1,11 @@
 FROM base-stage:1.0 as train-stage 
 
-# hyp3-lib
-COPY --from=hyp3lib-stage:1.0 / /
+RUN apt install --no-install-recommends -y \
+    gdal-bin
 
-RUN pip install 'numpy' 'netCDF4' 'scipy>=0.18.1' 'gdal>=3.0.2'
+RUN conda install gdal==3.0.2
+
+RUN pip install 'numpy' 'netCDF4' 'scipy>=0.18.1' 'hyp3lib==1.4.1'
 
 COPY TRAIN/ /usr/local/TRAIN/
 ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
