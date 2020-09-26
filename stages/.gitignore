@@ -1,0 +1,11 @@
+*
+!.gitignore
+
+!local-build-all.sh 
+!build.sh
+
+!*-stage
+!*-stage/dockerfile
+!*-stage/download.sh
+
+!finale-stage/jupyter-hooks

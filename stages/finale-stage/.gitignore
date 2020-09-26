@@ -1,6 +1,0 @@
-*
-!.gitignore
-!build.sh
-!dockerfile
-!jupyter-hooks/
-!jupyter-hooks/**
