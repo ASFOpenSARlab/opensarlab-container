@@ -1,4 +1,4 @@
-FROM base-stage:1.0 as giant-stage
+FROM base-stage: as giant-stage
 
 RUN apt install --no-install-recommends -y \
     build-essential \

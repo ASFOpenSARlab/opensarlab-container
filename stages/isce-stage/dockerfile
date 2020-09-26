@@ -1,4 +1,4 @@
-FROM base-stage:1.0 as isce-stage
+FROM base-stage: as isce-stage
 
 ENV ISCE_HOME /opt/isce2/isce/
 ENV PYTHONPATH $PYTHONPATH:/opt/isce2
@@ -19,7 +19,7 @@ RUN ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux
 
 RUN pip install 'numpy' 'h5py' 'scipy'
 
-COPY --from=isce-native:1.0 /opt/isce2/isce $ISCE_HOME
+COPY --from=isce-native: /opt/isce2/isce $ISCE_HOME
 
 # Add extra files to ISCE
 COPY topo.py $ISCE_HOME/applications/
@@ -42,4 +42,4 @@ RUN python3.7 $ISCE_HOME/applications/topsApp.py --help ; exit 0
 RUN python3.7 -c "import isce; print(isce.__version__)" ; exit 0
 RUN python3.7 -c "from isce.applications import topsApp" ; exit 0
 
-RUN gdalinfo --help
+RUN gdalinfo --help ; exit 0

@@ -1,4 +1,4 @@
-FROM base-stage:1.0 as train-stage 
+FROM base-stage: as train-stage 
 
 RUN apt install --no-install-recommends -y \
     gdal-bin

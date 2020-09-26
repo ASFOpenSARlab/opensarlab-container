@@ -1,4 +1,4 @@
-FROM base-stage:1.0 as mapready-stage 
+FROM base-stage: as mapready-stage 
 
 RUN set -e 
 
@@ -29,5 +29,5 @@ ENV PATH $PATH:$MAPREADY_HOME/bin/:$MAPREADY_HOME/lib/:$MAPREADY_HOME/share/
 
 FROM mapready-stage as mapready-stage-test 
 
-RUN asf_mapready --help
-RUN asf_geocode --help
+RUN asf_mapready -h ; exit 0
+RUN asf_geocode -h ; exit 0

@@ -1,4 +1,4 @@
-FROM base-stage:1.0 as start-stage
+FROM base-stage: as start-stage
 
 # Manually update nbconvert. A dicrepancy in the versioning causes a 500 when opening a notebook. https://github.com/jupyter/notebook/issues/3629#issuecomment-399408222
 # Remember, here pip is updating within the condas namespace where jupyter notebook items are held.
