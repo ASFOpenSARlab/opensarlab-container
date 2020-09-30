@@ -1,14 +1,16 @@
-FROM jupyter/minimal-notebook:dc9744740e12 as base-stage 
+FROM jupyter/base-notebook:hub-1.1.0 as base-stage 
 
 USER root
 
 RUN apt update && \
-    apt install --no-install-recommends -y software-properties-common && \
+    apt install --no-install-recommends -y \
+        software-properties-common \
+        git && \
     add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable && \
     apt update
 
-# Remove over 1 GB of latex files to save space
-RUN apt remove -y texlive*
+# Clean up a few other things at the end
+RUN conda clean --yes --all
 
 
 FROM base-stage as base-stage-test

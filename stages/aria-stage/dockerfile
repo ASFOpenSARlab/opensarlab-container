@@ -13,6 +13,12 @@ RUN pip install 'shapely' 'joblib' && \
 # Docs
 COPY ARIA-tools-docs ${ARIA_TOOLS_DOCS_HOME}
 
+# Clean up a few other things at the end
+RUN apt update && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt autoremove -y && \
+    conda clean --yes --all
+
 
 FROM aria-stage as aria-stage-test 
 

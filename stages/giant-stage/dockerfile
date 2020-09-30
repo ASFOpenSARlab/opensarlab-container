@@ -42,6 +42,12 @@ ENV PYTHONPATH $PYTHONPATH:/usr/local/GIAnT:/usr/local/GIAnT/SCR:/usr/local/GIAn
 
 COPY prepdataxml.py /usr/local/GIAnT/prepdataxml.py
 
+# Clean up a few other things at the end
+RUN apt update && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt autoremove -y && \
+    conda clean --yes --all
+
 
 FROM giant-stage as giant-stage-test 
 

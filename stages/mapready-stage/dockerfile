@@ -3,18 +3,20 @@ FROM base-stage: as mapready-stage
 RUN set -e 
 
 RUN apt install -y \
-    libgeo-proj4-perl \
     proj-bin \
     geotiff-bin \
     libshp-dev \
     libshp2 \
     libhdf5-dev \
     libnetcdf-dev \
-    libgdal-dev
+    libgdal-dev \
+    libgsl-dev
 
-RUN ln -s /usr/lib/x86_64-linux-gnu/libgeotiff.so.5 /usr/lib/x86_64-linux-gnu/libgeotiff.so.2 && \
-    ln -s /usr/lib/libgdal.so /usr/lib/libgdal.so.20
-
+RUN cp /usr/lib/x86_64-linux-gnu/libgeotiff.so.5 /usr/lib/x86_64-linux-gnu/libgeotiff.so.2 && \
+    cp /usr/lib/libgdal.so /usr/lib/libgdal.so.20 && \
+    cp /usr/lib/x86_64-linux-gnu/libproj.so.15 /usr/lib/x86_64-linux-gnu/libproj.so.12 && \
+    cp /usr/lib/x86_64-linux-gnu/libhdf5_serial.so.103 /usr/lib/x86_64-linux-gnu/libhdf5_serial.so.100 && \
+    cp /usr/lib/x86_64-linux-gnu/libnetcdf.so.15 /usr/lib/x86_64-linux-gnu/libnetcdf.so.13
 
 ENV MAPREADY_HOME /usr/local/mapready/
 
@@ -25,6 +27,12 @@ COPY mapready-build/man/* $MAPREADY_HOME/man/
 COPY mapready-build/share/* $MAPREADY_HOME/share/
 
 ENV PATH $PATH:$MAPREADY_HOME/bin/:$MAPREADY_HOME/lib/:$MAPREADY_HOME/share/
+
+# Clean up a few other things at the end
+RUN apt update && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt autoremove -y && \
+    conda clean --yes --all
 
 
 FROM mapready-stage as mapready-stage-test 

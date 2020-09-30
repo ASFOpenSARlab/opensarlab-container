@@ -8,8 +8,8 @@ sed -i -r $SED_STR dockerfile.build
 
 BUILD_TAG=$(date +"%F-%H-%M-%S")
 
-time docker build -f dockerfile.build -t $DOCKER_REGISTRY/general_cpu:test --target general_cpu-test .
-docker build -f dockerfile.build -t $DOCKER_REGISTRY/general_cpu:$BUILD_TAG -t $DOCKER_REGISTRY/general_cpu:$STAGE_MATURITY --target general_cpu --squash .
+time docker build -f dockerfile.build --target testing .
+docker build -f dockerfile.build -t $DOCKER_REGISTRY/general_cpu:$BUILD_TAG -t $DOCKER_REGISTRY/general_cpu:$STAGE_MATURITY --target release .
 
 # Push to registry
 docker push $DOCKER_REGISTRY/general_cpu:$BUILD_TAG

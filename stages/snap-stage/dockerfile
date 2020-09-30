@@ -16,6 +16,12 @@ COPY gpt.vmoptions /usr/local/snap/bin/gpt.vmoptions
 
 RUN rm -rf /tmp/build/
 
+# Clean up a few other things at the end
+RUN apt update && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt autoremove -y && \
+    conda clean --yes --all
+
 
 FROM snap-stage as snap-stage-test 
 

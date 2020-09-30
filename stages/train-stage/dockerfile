@@ -10,6 +10,12 @@ RUN pip install 'numpy' 'netCDF4' 'scipy>=0.18.1' 'hyp3lib==1.4.1'
 COPY TRAIN/ /usr/local/TRAIN/
 ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
 
+# Clean up a few other things at the end
+RUN apt update && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt autoremove -y && \
+    conda clean --yes --all
+
 
 FROM train-stage as train-stage-test 
 

@@ -1,87 +1,89 @@
-FROM base-stage: as general_cpu
+FROM base-stage: as build
 
-# Start
-COPY --from=start-stage: / /
+COPY --from=isce-stage: / / 
+COPY --from=mapready-stage: / /
+COPY --from=snap-stage: / /
+COPY --from=aria-stage: / /
+COPY --from=mintpy-stage: / /
+COPY --from=train-stage: / / 
+COPY --from=giant-stage: / /
+COPY --from=finale-stage: / /
 
-# Isce
+##########################################
+
+FROM base-stage: as release
+
+COPY --from=build / /
+
+# Enviroments don't get copied over on COPY
 ENV ISCE_HOME /opt/isce2/isce/
 ENV PYTHONPATH $PYTHONPATH:/opt/isce2
 ENV PATH $PATH:$ISCE_HOME/bin:$ISCE_HOME/applications
-COPY --from=isce-stage: / / 
 
-# Mapready
 ENV MAPREADY_HOME /usr/local/mapready/
 ENV PATH $PATH:$MAPREADY_HOME/bin/:$MAPREADY_HOME/lib/:$MAPREADY_HOME/share/
-COPY --from=mapready-stage: / /
 
-# Snap
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 ENV PATH $PATH:/usr/lib/jvm/java-11-openjdk-amd64/bin
-COPY --from=snap-stage: / /
 
-# ARIA
 ENV ARIA_TOOLS_HOME=/usr/local/ARIA-tools
 ENV ARIA_TOOLS_DOCS_HOME=/usr/local/ARIA-tools-docs
-COPY --from=aria-stage: / /
 
-# MintPy
 ENV MINTPY_HOME=/usr/local/MintPy
 ENV PYAPS_HOME=/usr/local/PyAPS
 ENV PATH=${PATH}:${MINTPY_HOME}/mintpy:${MINTPY_HOME}/sh
 ENV PYTHONPATH=${PYTHONPATH}:${MINTPY_HOME}:${PYAPS_HOME}
 ENV PROJ_LIB=/usr/share/proj
-COPY --from=mintpy-stage: / /
 
-# Train
 ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
-COPY --from=train-stage: / /
 
-# Giant 
 ENV PYTHONPATH $PYTHONPATH:/usr/local/GIAnT:/usr/local/GIAnT/SCR:/usr/local/GIAnT/tsinsar:/usr/local/GIAnT/examples:/usr/local/GIAnT/geocode:/usr/local/GIAnT/solver
-COPY --from=giant-stage: / /
-
-# Finale
-COPY --from=finale-stage: / /
 
 USER jovyan
 
 ##########################################
 
-FROM general_cpu as general_cpu-test 
+FROM release as testing 
 
-RUN set -e
+RUN set -x
 
 # Python
 RUN python --version 
-RUN python3.7 --version 
+RUN python3.8 --version 
 RUN python2 --version
 RUN python2.7 --version
 
 # ISCE
-RUN python3.7 $ISCE_HOME/applications/topsApp.py --help ; exit 0
-RUN python3.7 -c "import isce; print(isce.__version__)" ; exit 0
-RUN python3.7 -c "from isce.applications import topsApp" ; exit 0
+#>>RUN python3.8 $ISCE_HOME/applications/topsApp.py --help
+RUN python3.8 -c "import isce; print(isce.__version__)"
+RUN python3.8 -c "from isce.applications import topsApp"
 
 # gdal
-RUN gdalwarp --help ; exit 0
+#RUN gdalwarp --help
 
 # mapready
-RUN asf_mapready --help ; exit 0
-RUN asf_geocode --help ; exit 0
+#>>RUN asf_mapready --help
+#>>RUN asf_geocode --help
 
 # MintPy
-RUN python3.7 -c "import numpy" ; exit 0
-RUN python3.7 -c "from mintpy import view, tsview, plot_network, plot_transection, plot_coherence_matrix" ; exit 0
+RUN python3.8 -c "import numpy"
+
+# Warning! ***HDF5 library version mismatched error***
+# Headers are 1.10.6, library is 1.10.5 /opt/conda
+# What is LD_LIBRARY_PATH?
+# You can, at your own risk, disable this warning by setting the environment variable 'HDF5_DISABLE_VERSION_CHECK' to a value of '1
+#>>RUN python3.8 -c "from mintpy import view, tsview, plot_network, plot_transection, plot_coherence_matrix"
 
 # ARIA
-RUN ariaDownload.py --help ; exit 0
-RUN smallbaselineApp.py --help ; exit 0
+RUN ariaDownload.py --help
+# Same hdf5 
+#>>RUN smallbaselineApp.py --help
 
 # Train
-RUN python3.7 /usr/local/TRAIN/src/aps_weather_model.py -h ; exit 0
+RUN python3.8 /usr/local/TRAIN/src/aps_weather_model.py -h
 
 # giant
-RUN python2.7 /usr/local/GIAnT/SCR/ProcessStack.py -h ; exit 0
+RUN python2.7 /usr/local/GIAnT/SCR/ProcessStack.py -h
 
 # snap
-RUN /usr/local/snap/bin/gpt -h ; exit 0
+RUN /usr/local/snap/bin/gpt -h

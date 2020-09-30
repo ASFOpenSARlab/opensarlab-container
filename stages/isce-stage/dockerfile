@@ -5,17 +5,10 @@ ENV PYTHONPATH $PYTHONPATH:/opt/isce2
 ENV PATH $PATH:$ISCE_HOME/bin:$ISCE_HOME/applications
 
 RUN apt install --no-install-recommends -y \
-    gdal-bin \
-    gfortran-4.8 \
     libfftw3-dev \
-    libxm4 \
-    libgdal-dev
+    libxm4
 
-RUN conda install gdal==3.0.2
-
-#RUN ln -s /usr/lib/libgdal.so /usr/lib/libgdal.so.20
-RUN ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.101
-RUN ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so.10
+RUN conda install gdal==3.0.2 libgcc
 
 RUN pip install 'numpy' 'h5py' 'scipy'
 
@@ -29,8 +22,11 @@ RUN chmod 755 $ISCE_HOME/applications/*
 # So that users can temporarily add items to ISCE
 RUN chown -R jovyan:root $ISCE_HOME
 
-# Install after ISCE because of possible conflicts
-#RUN apt install -y libgfortran3 gfortran
+# Clean up a few other things at the end
+RUN apt update && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt autoremove -y && \
+    conda clean --yes --all
 
 
 FROM isce-stage as isce-stage-test
@@ -38,8 +34,8 @@ FROM isce-stage as isce-stage-test
 RUN echo "Testing isce"
 
 # A few tests for largely possible debugging, make errors as warnings 
-RUN python3.7 $ISCE_HOME/applications/topsApp.py --help ; exit 0
-RUN python3.7 -c "import isce; print(isce.__version__)" ; exit 0
-RUN python3.7 -c "from isce.applications import topsApp" ; exit 0
+RUN python3.8 $ISCE_HOME/applications/topsApp.py --help ; exit 0
+RUN python3.8 -c "import isce; print(isce.__version__)" ; exit 0
+RUN python3.8 -c "from isce.applications import topsApp" ; exit 0
 
 RUN gdalinfo --help ; exit 0
