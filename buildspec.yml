@@ -1,0 +1,12 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.8
+    commands:
+    - apt-get install -y python3-pip
+  build:
+    commands:
+    - $(aws ecr get-login --no-include-email)
+    - sh codebuild_build.sh
