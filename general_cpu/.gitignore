@@ -3,3 +3,4 @@
 !build.sh
 !local-build.sh
 !dockerfile
+!tests.sh

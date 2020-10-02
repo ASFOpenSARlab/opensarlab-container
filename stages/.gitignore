@@ -5,6 +5,7 @@
 !build.sh
 
 !*-stage
+*-stage/dockerfile.build
 !*-stage/dockerfile
 !*-stage/download.sh
 

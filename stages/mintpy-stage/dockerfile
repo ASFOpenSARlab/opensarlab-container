@@ -22,6 +22,7 @@ RUN apt update && \
 
 FROM mintpy-stage as mintpy-stage-test 
 
+RUN set -ex
 RUN python3.8 -c "import numpy"
 RUN python3.8 -c "from mintpy import view, tsview, plot_network, plot_transection, plot_coherence_matrix"
 RUN smallbaselineApp.py -h
