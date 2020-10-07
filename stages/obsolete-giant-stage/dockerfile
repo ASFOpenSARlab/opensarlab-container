@@ -13,6 +13,7 @@ RUN apt install --no-install-recommends -y \
     pkg-config \
     cython \
     ipython \
+    python \
     python-pip \
     python-numpy \
     python-scipy \

@@ -15,7 +15,7 @@ SED_STR="s|--from=(.*):|--from=$DOCKER_REGISTRY/\1:$STAGE_MATURITY|g"
 sed -i -r $SED_STR dockerfile.build
 
 time docker build -f dockerfile.build --target $STAGE_NAME-stage-test .
-time docker build -f dockerfile.build -t $DOCKER_REGISTRY/$STAGE_NAME-stage:$BUILD_TAG -t $DOCKER_REGISTRY/$STAGE_NAME-stage:$STAGE_MATURITY --target $STAGE_NAME-stage .
+time docker build -f dockerfile.build -t $DOCKER_REGISTRY/$STAGE_NAME-stage:$BUILD_TAG -t $DOCKER_REGISTRY/$STAGE_NAME-stage:$STAGE_MATURITY --target $STAGE_NAME-stage --no-cache .
 
 # Push image to registry
 if [ "$STAGE_LOCATION" != 'local' ]

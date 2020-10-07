@@ -14,7 +14,7 @@ RUN apt install -y \
 
 RUN cp /usr/lib/x86_64-linux-gnu/libgeotiff.so.5 /usr/lib/x86_64-linux-gnu/libgeotiff.so.2 && \
     cp /usr/lib/libgdal.so /usr/lib/libgdal.so.20 && \
-    cp /usr/lib/x86_64-linux-gnu/libproj.so.15 /usr/lib/x86_64-linux-gnu/libproj.so.12 && \
+    cp /usr/lib/x86_64-linux-gnu/libproj.so.19 /usr/lib/x86_64-linux-gnu/libproj.so.12 && \
     cp /usr/lib/x86_64-linux-gnu/libhdf5_serial.so.103 /usr/lib/x86_64-linux-gnu/libhdf5_serial.so.100 && \
     cp /usr/lib/x86_64-linux-gnu/libnetcdf.so.15 /usr/lib/x86_64-linux-gnu/libnetcdf.so.13
 
