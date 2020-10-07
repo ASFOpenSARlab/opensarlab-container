@@ -4,8 +4,7 @@ COPY --from=isce-stage: / /
 COPY --from=mapready-stage: / /
 COPY --from=snap-stage: / /
 COPY --from=aria-stage: / /
-COPY --from=train-stage: / / 
-COPY --from=giant-stage: / /
+COPY --from=train-stage: / /
 COPY --from=finale-stage: / /
 COPY --from=mintpy-stage: / /
 
@@ -30,8 +29,6 @@ ENV ARIA_TOOLS_HOME=/usr/local/ARIA-tools
 ENV ARIA_TOOLS_DOCS_HOME=/usr/local/ARIA-tools-docs
 
 ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
-
-ENV PYTHONPATH $PYTHONPATH:/usr/local/GIAnT:/usr/local/GIAnT/SCR:/usr/local/GIAnT/tsinsar:/usr/local/GIAnT/examples:/usr/local/GIAnT/geocode:/usr/local/GIAnT/solver
 
 ENV MINTPY_HOME=/usr/local/MintPy
 ENV PYAPS_HOME=/usr/local/PyAPS
