@@ -1,9 +1,7 @@
 set -e
 
 python --version 
-python3.8 --version 
-python2 --version
-python2.7 --version
+python3.8 --version
 
 # ISCE
 python3.8 $ISCE_HOME/applications/topsApp.py --help && [ $? -gt 2 ] && true
