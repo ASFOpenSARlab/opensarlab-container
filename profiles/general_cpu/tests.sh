@@ -28,8 +28,5 @@ ariaDownload.py --help
 # Train
 python3.8 /usr/local/TRAIN/src/aps_weather_model.py -h
 
-# giant
-python2.7 /usr/local/GIAnT/SCR/ProcessStack.py -h
-
 # snap
 /usr/local/snap/bin/gpt -h
