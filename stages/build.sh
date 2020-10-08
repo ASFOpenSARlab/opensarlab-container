@@ -10,7 +10,7 @@ STAGE_NAME=$1
 #    GIT_MERGE_HASHES=( ${COMMIT_HEAD} )  
 #fi
 
-BUILD_TAG=BUILD_TAG=$(date +"%F-%H-%M-%S")
+BUILD_TAG=$(date +"%F-%H-%M-%S")
 #BUILD_TAG=${GIT_MERGE_HASHES[0]}
 #MERGE_CHANGES_ARRAY=$(git diff --name-only ${GIT_MERGE_HASHES[1]} ${GIT_MERGE_HASHES[0]})
 #echo "Changes in files: ${MERGE_CHANGES_ARRAY[@]}"
