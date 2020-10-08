@@ -2,15 +2,16 @@ set -ex
 
 STAGE_NAME=$1
 
-COMMIT_HEAD=$(git rev-parse --short HEAD)
+#COMMIT_HEAD=$(git rev-parse --short HEAD)
 
 #if [ "$STAGE_COMPARE_MERGES" != 'false' ]; then
 #    GIT_MERGE_HASHES=( $(git log --merges --first-parent ${COMMIT_HEAD} --pretty=format:"%h") )
 #else
-    GIT_MERGE_HASHES=( ${COMMIT_HEAD} )  
+#    GIT_MERGE_HASHES=( ${COMMIT_HEAD} )  
 #fi
 
-BUILD_TAG=${GIT_MERGE_HASHES[0]}
+BUILD_TAG=BUILD_TAG=$(date +"%F-%H-%M-%S")
+#BUILD_TAG=${GIT_MERGE_HASHES[0]}
 #MERGE_CHANGES_ARRAY=$(git diff --name-only ${GIT_MERGE_HASHES[1]} ${GIT_MERGE_HASHES[0]})
 #echo "Changes in files: ${MERGE_CHANGES_ARRAY[@]}"
 
