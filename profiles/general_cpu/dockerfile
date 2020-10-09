@@ -36,10 +36,6 @@ ENV PATH=${PATH}:${MINTPY_HOME}/mintpy:${MINTPY_HOME}/sh
 ENV PYTHONPATH=${PYTHONPATH}:${MINTPY_HOME}:${PYAPS_HOME}
 ENV PROJ_LIB=/usr/share/proj
 
-# Add sudo group user 599 elevation to sudoers. 
-# This is in finale but might be overwritten.
-RUN echo '%elevation ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
-
 USER jovyan
 
 ##########################################
