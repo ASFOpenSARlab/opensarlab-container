@@ -8,15 +8,12 @@ export STAGE_MATURITY=test
 export STAGE_REMOTE_PUSH=false
 export STAGE_COMPARE_MERGES=false
 
-for j in \
-    base \
-    aria \
-    finale \
-    isce \
-    mapready \
-    mintpy \
-    snap \
-    train  # giant
-do 
+if [ "$#" -gt 0 ]; then
+    STAGE_LIST=( "$@" )
+else
+    STAGE_LIST=( 'base' 'aria' 'finale' 'isce' 'mapready' 'mintpy' 'snap' 'train' )
+fi
+
+for j in "${STAGE_LIST[@]}"; do 
     bash build.sh $j
 done
