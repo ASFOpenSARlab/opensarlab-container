@@ -1,4 +1,7 @@
+#!/bin/bash
+
 set -e
+# The idiom "&& [ $? -gt 2 ] && true" ignores warnings from the previous command
 
 python --version 
 python3.8 --version
@@ -28,4 +31,4 @@ python3.8 /usr/local/TRAIN/src/aps_weather_model.py -h
 
 # snap
 /usr/local/snap/bin/gpt -h
-snap --help 
+snap --help && [ $? -gt 2 ] && true
