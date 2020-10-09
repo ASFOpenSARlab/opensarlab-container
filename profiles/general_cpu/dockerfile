@@ -1,12 +1,12 @@
 FROM base-stage: as build
 
 COPY --from=isce-stage: / / 
-COPY --from=mapready-stage: / /
 COPY --from=snap-stage: / /
 COPY --from=aria-stage: / /
 COPY --from=train-stage: / /
-COPY --from=finale-stage: / /
 COPY --from=mintpy-stage: / /
+COPY --from=mapready-stage: / /
+COPY --from=finale-stage: / /
 
 ##########################################
 

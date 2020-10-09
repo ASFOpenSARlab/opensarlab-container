@@ -8,11 +8,13 @@ RUN pip install --upgrade nbconvert
 RUN pip install tornado==5.1.1  # 4.5.3
 
 # Install general items. If a library is needed for a specific piece of software, put it with that software.
-RUN apt install --no-install-recommends -y \
+RUN apt update && \
+    apt install --no-install-recommends -y \
     python3 \
     python3-pip \
     python3-setuptools \
     zip \
+    unzip \
     wget \
     vim \
     rsync \
@@ -32,7 +34,7 @@ RUN sed -i '/LaTeX/d' /opt/conda/lib/python3.8/site-packages/notebook/templates/
     sed -i '/exporter\.display/d' /opt/conda/lib/python3.8/site-packages/notebook/templates/notebook.html
 
 # Make sure that any files in the home directory are jovyan permission
- RUN chown -R jovyan:users /home/jovyan/
+RUN chown -R jovyan:users /home/jovyan/
 
 # Add sudo group user 599 elevation
 RUN addgroup -gid 599 elevation \

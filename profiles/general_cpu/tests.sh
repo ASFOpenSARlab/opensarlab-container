@@ -28,3 +28,4 @@ python3.8 /usr/local/TRAIN/src/aps_weather_model.py -h
 
 # snap
 /usr/local/snap/bin/gpt -h
+snap --help 
