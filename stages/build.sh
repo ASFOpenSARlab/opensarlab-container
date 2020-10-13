@@ -2,20 +2,20 @@ set -ex
 
 STAGE_NAME=$1
 
-#COMMIT_HEAD=$(git rev-parse --short HEAD)
+COMMIT_HEAD=$(git rev-parse --short HEAD)
 
-#if [ "$STAGE_COMPARE_MERGES" != 'false' ]; then
-#    GIT_MERGE_HASHES=( $(git log --merges --first-parent ${COMMIT_HEAD} --pretty=format:"%h") )
-#else
-#    GIT_MERGE_HASHES=( ${COMMIT_HEAD} )  
-#fi
+if [ "$STAGE_COMPARE_MERGES" != 'false' ]; then
+    GIT_MERGE_HASHES=( $(git log --merges --first-parent ${COMMIT_HEAD} --pretty=format:"%h") )
+else
+    GIT_MERGE_HASHES=( ${COMMIT_HEAD} )  
+fi
 
-BUILD_TAG=$(date +"%F-%H-%M-%S")
-#BUILD_TAG=${GIT_MERGE_HASHES[0]}
-#MERGE_CHANGES_ARRAY=$(git diff --name-only ${GIT_MERGE_HASHES[1]} ${GIT_MERGE_HASHES[0]})
-#echo "Changes in files: ${MERGE_CHANGES_ARRAY[@]}"
+#$BUILD_TAG=$(date +"%F-%H-%M-%S")
+BUILD_TAG=${GIT_MERGE_HASHES[0]}
+MERGE_CHANGES_ARRAY=$(git diff --name-only ${GIT_MERGE_HASHES[1]} ${GIT_MERGE_HASHES[0]})
+echo "Changes in files: ${MERGE_CHANGES_ARRAY[@]}"
 
-#if [[ " ${MERGE_CHANGES_ARRAY[@]} " =~ $STAGE_NAME-stage ]]; then
+if [[ " ${MERGE_CHANGES_ARRAY[@]} " =~ $STAGE_NAME-stage ]]; then
 
     echo "Building '$DOCKER_REGISTRY/$STAGE_NAME' with tags '$BUILD_TAG' and '$STAGE_MATURITY' for location '$STAGE_LOCATION' "
 
@@ -36,4 +36,6 @@ BUILD_TAG=$(date +"%F-%H-%M-%S")
         docker push $DOCKER_REGISTRY/$STAGE_NAME-stage:$BUILD_TAG
         docker push $DOCKER_REGISTRY/$STAGE_NAME-stage:$STAGE_MATURITY
     fi
-#fi
+else
+    echo "There are no paths to build."
+fi
