@@ -26,3 +26,5 @@ mkdir -p /home/jovyan/.ipython/profile_default/startup/
 cp /etc/jupyter-hooks/custom_magics/00-df.py /home/jovyan/.ipython/profile_default/startup/00-df.py
 
 gitpuller https://github.com/asfadmin/asf-jupyter-notebooks.git master /home/jovyan/notebooks
+
+gitpuller https://github.com/asfadmin/asf-jupyter-docs.git master /home/jovyan/opensarlab_docs
