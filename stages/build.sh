@@ -36,4 +36,6 @@ if [[ " ${MERGE_CHANGES_ARRAY[@]} " =~ $STAGE_NAME-stage ]]; then
         docker push $DOCKER_REGISTRY/$STAGE_NAME-stage:$BUILD_TAG
         docker push $DOCKER_REGISTRY/$STAGE_NAME-stage:$STAGE_MATURITY
     fi
+else
+    echo "There are no paths to build."
 fi
