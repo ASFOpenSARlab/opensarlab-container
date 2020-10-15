@@ -28,8 +28,11 @@ if [[ " ${MERGE_CHANGES_ARRAY[@]} " =~ $STAGE_NAME-stage ]] || [ "$STAGE_FORCE_B
     SED_STR="s|--from=(.*):|--from=$DOCKER_REGISTRY/\1:$STAGE_MATURITY|g"
     sed -i -r $SED_STR dockerfile.build
 
+    mkdir -p tests
+    [ ! -f ../../tests/$STAGE_NAME.sh ] && cp ../../tests/$STAGE_NAME.sh tests/$STAGE_NAME.sh || touch tests/$STAGE_NAME.sh
+
     time docker build -f dockerfile.build --target $STAGE_NAME-stage-test .
-    time docker build -f dockerfile.build -t $DOCKER_REGISTRY/$STAGE_NAME-stage:$BUILD_TAG -t $DOCKER_REGISTRY/$STAGE_NAME-stage:$STAGE_MATURITY --target $STAGE_NAME-stage --no-cache .
+    time docker build -f dockerfile.build -t $DOCKER_REGISTRY/$STAGE_NAME-stage:$BUILD_TAG -t $DOCKER_REGISTRY/$STAGE_NAME-stage:$STAGE_MATURITY --target $STAGE_NAME-stage .
 
     # Push image to registry
     if [ "$STAGE_REMOTE_PUSH" != 'false' ]; then

@@ -37,5 +37,5 @@ RUN apt update && \
 
 FROM mapready-stage as mapready-stage-test 
 
-RUN asf_mapready -h ; exit 0
-RUN asf_geocode -h ; exit 0
+COPY tests/mapready.sh mapready.sh
+RUN bash mapready.sh

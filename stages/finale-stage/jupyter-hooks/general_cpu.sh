@@ -28,3 +28,4 @@ cp /etc/jupyter-hooks/custom_magics/00-df.py /home/jovyan/.ipython/profile_defau
 gitpuller https://github.com/asfadmin/asf-jupyter-notebooks.git master /home/jovyan/notebooks
 
 gitpuller https://github.com/asfadmin/asf-jupyter-docs.git master /home/jovyan/opensarlab_docs
+python /etc/jupyter-hooks/scripts/osl_user_guides_to_ipynb.py -p /home/jovyan/opensarlab_docs

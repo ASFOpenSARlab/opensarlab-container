@@ -25,4 +25,5 @@ RUN apt update && \
 
 FROM snap-stage as snap-stage-test 
 
-RUN echo "Testing snap"
+COPY tests/snap.sh snap.sh
+RUN bash snap.sh
