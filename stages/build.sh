@@ -29,7 +29,7 @@ if [[ " ${MERGE_CHANGES_ARRAY[@]} " =~ $STAGE_NAME-stage ]] || [ "$STAGE_FORCE_B
     sed -i -r $SED_STR dockerfile.build
 
     mkdir -p tests
-    [ ! -f ../../tests/$STAGE_NAME.sh ] && cp ../../tests/$STAGE_NAME.sh tests/$STAGE_NAME.sh || touch tests/$STAGE_NAME.sh
+    cp ../../tests/$STAGE_NAME.sh tests/$STAGE_NAME.sh || touch tests/$STAGE_NAME.sh
 
     time docker build -f dockerfile.build --target $STAGE_NAME-stage-test .
     time docker build -f dockerfile.build -t $DOCKER_REGISTRY/$STAGE_NAME-stage:$BUILD_TAG -t $DOCKER_REGISTRY/$STAGE_NAME-stage:$STAGE_MATURITY --target $STAGE_NAME-stage .

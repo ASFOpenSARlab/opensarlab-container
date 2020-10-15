@@ -10,3 +10,4 @@
 !*-stage/download.sh
 
 !finale-stage/jupyter-hooks
+!finale-stage/jupyter-hooks/**

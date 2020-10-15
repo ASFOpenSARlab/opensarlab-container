@@ -9,7 +9,9 @@ pip install --user \
     mpldatacursor \
     rise \
     hide_code \
-    jupyter_nbextensions_configurator 
+    jupyter_nbextensions_configurator \
+    'pandoc==2.0a4' \ 
+    pypandoc
 
 # Add Path to local pip execs. 
 export PATH=$HOME/.local/bin:$PATH
