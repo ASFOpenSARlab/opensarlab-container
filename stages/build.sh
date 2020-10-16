@@ -15,7 +15,7 @@ BUILD_TAG=${GIT_MERGE_HASHES[0]}
 MERGE_CHANGES_ARRAY=$(git diff --name-only ${GIT_MERGE_HASHES[1]} ${GIT_MERGE_HASHES[0]})
 echo "Changes in files: ${MERGE_CHANGES_ARRAY[@]}"
 
-if [[ " ${MERGE_CHANGES_ARRAY[@]} " =~ $STAGE_NAME-stage ]] || [ "$STAGE_FORCE_BUILD" = 'true' ]; then
+if [[ " ${MERGE_CHANGES_ARRAY[@]} " =~ $STAGE_NAME-stage ]] || [[ " ${MERGE_CHANGES_ARRAY[@]} " =~ ../tests/$STAGE_NAME.sh ]] || [ "$STAGE_FORCE_BUILD" = 'true' ]; then
 
     echo "Building '$DOCKER_REGISTRY/$STAGE_NAME' with tags '$BUILD_TAG' and '$STAGE_MATURITY' for location '$STAGE_LOCATION' "
 
