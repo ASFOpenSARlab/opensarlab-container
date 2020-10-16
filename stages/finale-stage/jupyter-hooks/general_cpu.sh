@@ -9,7 +9,9 @@ pip install --user \
     mpldatacursor \
     rise \
     hide_code \
-    jupyter_nbextensions_configurator 
+    jupyter_nbextensions_configurator \
+    'pandoc==2.0a4' \ 
+    pypandoc
 
 # Add Path to local pip execs. 
 export PATH=$HOME/.local/bin:$PATH
@@ -28,3 +30,4 @@ cp /etc/jupyter-hooks/custom_magics/00-df.py /home/jovyan/.ipython/profile_defau
 gitpuller https://github.com/asfadmin/asf-jupyter-notebooks.git master /home/jovyan/notebooks
 
 gitpuller https://github.com/asfadmin/asf-jupyter-docs.git master /home/jovyan/opensarlab_docs
+python /etc/jupyter-hooks/scripts/osl_user_guides_to_ipynb.py -p /home/jovyan/opensarlab_docs

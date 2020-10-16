@@ -42,5 +42,22 @@ USER jovyan
 
 FROM release as testing 
 
-COPY tests.sh tests.sh 
-RUN bash tests.sh
+COPY tests/aria.sh aria.sh
+COPY tests/gdal.sh gdal.sh
+COPY tests/general.sh general.sh
+COPY tests/isce.sh isce.sh
+COPY tests/mapready.sh mapready.sh
+COPY tests/mintpy.sh mintpy.sh
+COPY tests/snap.sh snap.sh
+COPY tests/train.sh train.sh
+COPY tests/finale.sh finale.sh  
+
+RUN bash aria.sh
+RUN bash gdal.sh
+RUN bash general.sh
+RUN bash isce.sh
+RUN bash mapready.sh
+RUN bash mintpy.sh
+RUN bash snap.sh
+RUN bash train.sh
+RUN bash finale.sh
