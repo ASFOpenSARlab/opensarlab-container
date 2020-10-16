@@ -8,12 +8,9 @@ RUN apt install --no-install-recommends -y \
     libfftw3-dev \
     libxm4
 
-RUN conda create -y -n isce python=3.8 && \
-    conda install -n isce \
-        gdal libgcc numpy h5py scipy
-RUN conda init bash
+RUN conda install gdal=3.1.3 libgcc numpy=1.19.1 h5py scipy=1.5.2
 
-RUN cp /opt/conda/envs/isce/lib/libgdal.so.27 /opt/conda/envs/isce/lib/libgdal.so.26
+RUN cp /opt/conda/lib/libgdal.so.27 /opt/conda/lib/libgdal.so.26
 
 COPY --from=isce-native: /opt/isce2/isce $ISCE_HOME
 
