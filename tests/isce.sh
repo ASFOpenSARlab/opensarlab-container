@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-source $(conda info --base)/etc/profile.d/conda.sh
-conda activate isce
-
 set -ex
 # The idiom "&& [ $? -gt 2 ] && true" ignores warnings from the previous command
 
