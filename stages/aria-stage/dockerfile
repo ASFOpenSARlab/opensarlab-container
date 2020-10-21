@@ -22,4 +22,5 @@ RUN apt update && \
 
 FROM aria-stage as aria-stage-test 
 
-RUN echo "Testing aria"
+COPY tests/aria.sh aria.sh
+RUN bash aria.sh

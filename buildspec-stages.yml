@@ -1,0 +1,14 @@
+version: 0.2
+
+env:
+  git-credential-helper: yes
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.8
+  build:
+    commands:
+    - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 553778890976.dkr.ecr.us-east-1.amazonaws.com
+    - cd stages
+    - bash build.sh ${STAGE_NAME}

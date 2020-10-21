@@ -15,3 +15,6 @@ RUN conda clean --yes --all
 
 
 FROM base-stage as base-stage-test
+
+COPY tests/base.sh base.sh
+RUN bash base.sh

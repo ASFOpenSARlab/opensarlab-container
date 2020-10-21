@@ -10,7 +10,8 @@ ENV PROJ_LIB=/usr/share/proj
 COPY MintPy ${MINTPY_HOME}
 COPY PyAPS ${PYAPS_HOME}/pyaps3
 
-RUN conda install -y --file $MINTPY_HOME/docs/conda.txt
+# numpy >= 1.19.1, scipy >= 1.5.2, gdal >= 3.1.3 
+RUN conda install  -y --file $MINTPY_HOME/docs/conda.txt
 RUN pip install pykml -e git+https://github.com/yunjunz/pykml.git#egg=pykml
 
 # Clean up a few other things at the end
@@ -22,7 +23,5 @@ RUN apt update && \
 
 FROM mintpy-stage as mintpy-stage-test 
 
-RUN set -ex
-RUN python3.8 -c "import numpy"
-RUN python3.8 -c "from mintpy import view, tsview, plot_network, plot_transection, plot_coherence_matrix"
-RUN smallbaselineApp.py -h
+COPY tests/mintpy.sh mintpy.sh
+RUN bash mintpy.sh
