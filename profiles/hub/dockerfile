@@ -13,15 +13,15 @@ RUN ln -fs /usr/share/zoneinfo/America/Alaska /etc/localtime
 RUN dpkg-reconfigure --frontend noninteractive tzdata
 RUN apt install --no-install-recommends -y \
     python3.8 \
-    python3-pip \
-    python3-boto3 \
-    cron \
+    python3-pip=20.0.2 \
+    python3-boto3=1.9.253 \
+    cron=3.0pl1 \
     less \
-    vim \
-    sudo \
+    vim=1.20.3 \
+    sudo=1.8.31 \
     mailutils
 
-RUN pip3 install --upgrade awscli pyyaml python-crontab
+RUN python -m pip3 install --upgrade awscli pyyaml python-crontab
 
 #RUN echo "address { email-addr eric@localhost.example; email-domain opensarlab.asf.alaska.edu; };" > /etc/mailutils.conf
 

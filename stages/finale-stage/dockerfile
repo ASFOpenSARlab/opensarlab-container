@@ -2,32 +2,29 @@ FROM base-stage: as finale-stage
 
 # Manually update nbconvert. A dicrepancy in the versioning causes a 500 when opening a notebook. https://github.com/jupyter/notebook/issues/3629#issuecomment-399408222
 # Remember, here pip is updating within the condas namespace where jupyter notebook items are held.
-RUN pip install --upgrade nbconvert
+RUN python -m pip install --upgrade nbconvert
 
 # Downgrade tornado otherwise the notebook can't connect to the notebook server. https://github.com/jupyter/notebook/issues/2664#issuecomment-468954423
-RUN pip install tornado==5.1.1  # 4.5.3
+RUN python -m pip install tornado==6.1 # 5.1.1
 
 # Install general items. If a library is needed for a specific piece of software, put it with that software.
 RUN apt install --no-install-recommends -y \
-    zip \
-    unzip \
-    wget \
-    vim \
-    rsync \
-    less \
-    snaphu \
-    curl
+    zip=3.0 \
+    unzip=6.0 \
+    wget=1.20.3 \
+    rsync=3.1.3 \
+    snaphu=2.0.3 \
+    curl=7.68.0
 
-RUN pip install 'awscli' 'boto3>=1.4.4' 'pyyaml>=3.12' 'matplotlib==3.3.2' 'bokeh'
+RUN pip install 'awscli==1.19.30' 'boto3==1.17.30' 'pyyaml==5.4.1' 'matplotlib==3.3.4' 'bokeh==2.3.0' 'asf-hyp3' 'hyp3-sdk==0.6'
 
 # Install any other custom and jupyter libaries like widgets
 # Use pip (conda version) since we want to corner off GIAnT's work and also run it with Jupyter
-RUN pip install asf-hyp3
+RUN python -m pip install asf-hyp3
 RUN conda install -c conda-forge jupyter_contrib_nbextensions -y
 
 # Remove 'LaTeX' options and all custom exporters in download menu
-RUN sed -i '/LaTeX/d' /opt/conda/lib/python3.8/site-packages/notebook/templates/notebook.html && \
-    sed -i '/exporter\.display/d' /opt/conda/lib/python3.8/site-packages/notebook/templates/notebook.html
+RUN sed -i '/LaTeX/d' /opt/conda/lib/python3.8/site-packages/notebook/templates/notebook.html
 
 # Make sure that any files in the home directory are jovyan permission
 RUN chown -R jovyan:users $HOME/
