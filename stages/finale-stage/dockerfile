@@ -16,7 +16,7 @@ RUN apt install --no-install-recommends -y \
     snaphu=2.0.3 \
     curl=7.68.0
 
-RUN pip install 'awscli==1.19.30' 'boto3==1.17.30' 'pyyaml==5.4.1' 'matplotlib==3.3.4' 'bokeh==2.3.0' 'asf-hyp3' 'hyp3-sdk==0.6'
+RUN python -m pip install 'awscli==1.19.30' 'boto3==1.17.30' 'pyyaml==5.4.1' 'matplotlib==3.3.4' 'bokeh==2.3.0' 'asf-hyp3' 'hyp3-sdk==0.6'
 
 # Install any other custom and jupyter libaries like widgets
 # Use pip (conda version) since we want to corner off GIAnT's work and also run it with Jupyter

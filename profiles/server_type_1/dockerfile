@@ -1,0 +1,24 @@
+FROM base-stage: as build
+
+RUN conda install -y scipy numpy obspy sympy geopy matplotlib pandas
+
+COPY --from=finale-stage: / /
+
+COPY merge_paths.sh merge_paths.sh
+RUN . ./merge_paths.sh /envs/finale-stage.env && \
+    env | sort > /envs/all.env
+
+##########################################
+
+FROM base-stage: as release
+
+COPY --from=build / /
+
+#PLEASE_ADD_ENVS_HERE
+
+USER jovyan
+
+##########################################
+
+FROM release as testing 
+
