@@ -132,22 +132,27 @@ RUN pip install --upgrade nbconvert
 RUN pip install tornado==5.1.1  # 4.5.3
 
 # Install general items. If a library is needed for a specific piece of software, put it with that software.
-RUN apt install --no-install-recommends -y \
-    zip \
-    unzip \
-    wget \
-    vim \
-    rsync \
-    less \
-    snaphu \
-    curl
+RUN apt update && \
+    apt install --fix-missing --no-install-recommends -y \
+        zip \
+        unzip \
+        wget \
+        vim \
+        rsync \
+        less \
+        snaphu \
+        curl \
+        openssh-client \
+        libgl1-mesa-glx \
+        emacs \
+        gnupg2
 
 RUN pip install 'awscli==1.19.33' 'boto3==1.17.32' 'pyyaml==5.4.1' 'bokeh==2.3.0'
 
 # Install any other custom and jupyter libaries like widgets
 # Use pip (conda version) since we want to corner off GIAnT's work and also run it with Jupyter
 RUN pip install asf-hyp3==3.0.3
-RUN conda install -c conda-forge jupyter_contrib_nbextensions=0.5.1 -y
+RUN conda install -c conda-forge jupyter_contrib_nbextensions=0.5.1 jupyter-resource-usage -y
 
 # Make sure that any files in the home directory are jovyan permission
 RUN chown -R jovyan:users $HOME/
