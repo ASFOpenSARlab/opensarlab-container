@@ -1,0 +1,7 @@
+*
+!.gitignore
+!jupyter-hooks/**
+!build.sh
+!dockerfile
+!download.sh
+local-build.sh 

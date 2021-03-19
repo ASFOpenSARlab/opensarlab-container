@@ -1,24 +1,187 @@
-FROM base-stage: as build
+FROM jupyter/base-notebook:hub-1.1.0 as release
 
-RUN conda install -y scipy numpy obspy sympy geopy matplotlib pandas
+# Base Stage ****************************************************************
+USER root
+WORKDIR /
 
-COPY --from=finale-stage: / /
+RUN apt update && \
+    apt install --no-install-recommends -y \
+        software-properties-common \
+        git && \
+    add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable && \
+    apt update && \
+    apt upgrade -y
 
-COPY merge_paths.sh merge_paths.sh
-RUN . ./merge_paths.sh /envs/finale-stage.env && \
-    env | sort > /envs/all.env
+COPY tests/* /tests/
 
-##########################################
+# ARIA  ****************************************************************
+ENV ARIA_TOOLS_HOME=/usr/local/ARIA-tools
+ENV ARIA_TOOLS_DOCS_HOME=/usr/local/ARIA-tools-docs
 
-FROM base-stage: as release
+# Tools
+COPY ARIA-tools ${ARIA_TOOLS_HOME}
+RUN pip install 'shapely==1.7.1' 'joblib==1.0.1' && \
+    cd ${ARIA_TOOLS_HOME} && \
+    python setup.py install && \
+    cd /
 
-COPY --from=build / /
+# Docs
+COPY ARIA-tools-docs ${ARIA_TOOLS_DOCS_HOME}
 
-#PLEASE_ADD_ENVS_HERE
+RUN bash /tests/aria.sh
 
+
+# TRAIN  ****************************************************************
+RUN apt install --no-install-recommends -y \
+    gdal-bin
+
+RUN conda install gdal
+
+# hyp3lib==1.4.1 cannot be changed
+RUN pip install 'numpy==1.20.1' 'netCDF4==1.5.6' 'scipy==1.6.1' 'hyp3lib==1.4.1'
+
+COPY TRAIN/ /usr/local/TRAIN/
+ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
+
+RUN bash /tests/train.sh
+
+
+# MINTPY  ****************************************************************
+ENV MINTPY_HOME=/usr/local/MintPy
+ENV PYAPS_HOME=/usr/local/PyAPS
+ENV PATH=${PATH}:${MINTPY_HOME}/mintpy:${MINTPY_HOME}/sh
+ENV PYTHONPATH=${PYTHONPATH}:${MINTPY_HOME}:${PYAPS_HOME}
+ENV PROJ_LIB=/usr/share/proj
+
+# Pull and config mintpy and pyaps
+COPY MintPy ${MINTPY_HOME}
+COPY PyAPS ${PYAPS_HOME}/pyaps3
+
+RUN conda install  -y --file $MINTPY_HOME/docs/conda.txt
+RUN pip install pykml -e git+https://github.com/yunjunz/pykml.git#egg=pykml
+
+RUN bash /tests/mintpy.sh
+
+
+# MAPREADY ****************************************************************
+RUN set -e 
+
+RUN apt install -y \
+    proj-bin \
+    geotiff-bin \
+    libshp-dev \
+    libshp2 \
+    libhdf5-dev \
+    libnetcdf-dev \
+    libgdal-dev \
+    libgsl-dev
+
+RUN cp /usr/lib/x86_64-linux-gnu/libgeotiff.so.5 /usr/lib/x86_64-linux-gnu/libgeotiff.so.2 && \
+    cp /usr/lib/libgdal.so /usr/lib/libgdal.so.20 && \
+    cp /usr/lib/x86_64-linux-gnu/libproj.so.19 /usr/lib/x86_64-linux-gnu/libproj.so.12 && \
+    cp /usr/lib/x86_64-linux-gnu/libhdf5_serial.so.103 /usr/lib/x86_64-linux-gnu/libhdf5_serial.so.100 && \
+    cp /usr/lib/x86_64-linux-gnu/libnetcdf.so.15 /usr/lib/x86_64-linux-gnu/libnetcdf.so.13
+
+ENV MAPREADY_HOME /usr/local/mapready/
+
+COPY mapready-build/bin/* $MAPREADY_HOME/bin/
+COPY mapready-build/doc/* $MAPREADY_HOME/doc/
+COPY mapready-build/lib/* $MAPREADY_HOME/lib/
+COPY mapready-build/man/* $MAPREADY_HOME/man/
+COPY mapready-build/share/* $MAPREADY_HOME/share/
+
+ENV PATH $PATH:$MAPREADY_HOME/bin/:$MAPREADY_HOME/lib/:$MAPREADY_HOME/share/
+
+RUN bash /tests/mapready.sh
+
+
+# ISCE  ****************************************************************
+ENV ISCE_HOME /opt/isce2/isce/
+ENV PYTHONPATH $PYTHONPATH:/opt/isce2
+ENV PATH $PATH:$ISCE_HOME/bin:$ISCE_HOME/applications
+
+RUN apt install --no-install-recommends -y \
+    libfftw3-dev \
+    libxm4
+
+RUN conda install gdal=3.2.1 libgcc=7.2.0 numpy=1.20.1 h5py=3.1.0 scipy=1.6.1
+
+RUN cp /opt/conda/lib/libgdal.so.28 /opt/conda/lib/libgdal.so.26
+
+COPY --from=isce-native: /opt/isce2/isce $ISCE_HOME
+
+# Add extra files to ISCE
+COPY topo.py $ISCE_HOME/applications/
+COPY unpackFrame_ALOS_raw.py $ISCE_HOME/applications/
+RUN chmod 755 $ISCE_HOME/applications/*
+
+# So that users can temporarily add items to ISCE
+RUN chown -R jovyan:root $ISCE_HOME
+
+RUN bash /tests/isce.sh
+
+
+# FINALE ****************************************************************
+RUN conda install -y scipy=1.6.1 numpy=1.20.1 matplotlib=3.3.4 pandas=1.2.3
+
+# Manually update nbconvert. A dicrepancy in the versioning causes a 500 when opening a notebook. https://github.com/jupyter/notebook/issues/3629#issuecomment-399408222
+# Remember, here pip is updating within the condas namespace where jupyter notebook items are held.
+RUN pip install --upgrade nbconvert
+
+# Downgrade tornado otherwise the notebook can't connect to the notebook server. https://github.com/jupyter/notebook/issues/2664#issuecomment-468954423
+RUN pip install tornado==5.1.1  # 4.5.3
+
+# Install general items. If a library is needed for a specific piece of software, put it with that software.
+RUN apt install --no-install-recommends -y \
+    zip \
+    unzip \
+    wget \
+    vim \
+    rsync \
+    less \
+    snaphu \
+    curl
+
+RUN pip install 'awscli==1.19.33' 'boto3==1.17.32' 'pyyaml==5.4.1' 'bokeh==2.3.0'
+
+# Install any other custom and jupyter libaries like widgets
+# Use pip (conda version) since we want to corner off GIAnT's work and also run it with Jupyter
+RUN pip install asf-hyp3==3.0.3
+RUN conda install -c conda-forge jupyter_contrib_nbextensions=0.5.1 -y
+
+# Make sure that any files in the home directory are jovyan permission
+RUN chown -R jovyan:users $HOME/
+
+# Add sudo group user 599 elevation
+RUN addgroup -gid 599 elevation \
+    && echo '%elevation ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+
+# Add jupyter hooks
+COPY jupyter-hooks /etc/jupyter-hooks
+RUN chmod -R 755 /etc/jupyter-hooks && \
+    chown -R jovyan:users /etc/jupyter-hooks
+
+# Clean up a few other things at the end
+RUN apt update && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt autoremove -y && \
+    conda clean --yes --all
+
+RUN bash /tests/finale.sh
+
+RUN rm -rf /home/jovyan/..?* /home/jovyan/.[!.]* /home/jovyan/*
+WORKDIR /home/jovyan
 USER jovyan
 
 ##########################################
 
 FROM release as testing 
 
+RUN bash /tests/aria.sh
+RUN bash /tests/gdal.sh
+RUN bash /tests/general.sh
+RUN bash /tests/isce.sh
+RUN bash /tests/mapready.sh
+RUN bash /tests/mintpy.sh
+RUN bash /tests/train.sh
+RUN bash /tests/finale.sh

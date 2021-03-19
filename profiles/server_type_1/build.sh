@@ -3,7 +3,15 @@ set -ex
 
 if [ "$STAGE_FORCE_BUILD" = 'true' ]; then
 
+    [ -e download.sh ] && bash download.sh
+
     cp dockerfile dockerfile.build
+
+    SED_STR="s|--from=(.*):|--from=$DOCKER_REGISTRY/\1:$PROFILE_MATURITY|g"
+    sed -i -r $SED_STR dockerfile.build
+
+    mkdir -p tests
+    cp -r ../../tests/* tests/
 
     BUILD_TAG=$(date +"%F-%H-%M-%S")
 

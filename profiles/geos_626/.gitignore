@@ -1,6 +1,0 @@
-*
-!.gitignore
-!build.sh
-!local-build.sh
-!dockerfile
-!merge_paths.sh
