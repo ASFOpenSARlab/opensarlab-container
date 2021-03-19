@@ -37,30 +37,25 @@ Resources:
                   - "codecommit:GitPull"
                 Resource: !Sub 'arn:aws:codecommit:*:*:${CodeCommitSourceRepo}'
 
-  HubRepository:
+  #HubRepository:
+  #  Type: AWS::ECR::Repository
+  #  Properties:
+  #    RepositoryName: !Sub "${AWS::StackName}/hub"
+
+  ISCENativeRepository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: !Sub "${AWS::StackName}/hub"
+      RepositoryName: !Sub "${AWS::StackName}/isce-native"
 
-  BaseRepository:
+  ServerTypeOneRepository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: !Sub "${AWS::StackName}/base-stage"
+      RepositoryName: !Sub "${AWS::StackName}/server_type_1"
 
-  FinaleRepository:
-    Type: AWS::ECR::Repository
-    Properties:
-      RepositoryName: !Sub "${AWS::StackName}/finale-stage"
-
-  GEOS626Repository:
-    Type: AWS::ECR::Repository
-    Properties:
-      RepositoryName: !Sub "${AWS::StackName}/geos_626"
-
-  StageContainerCodeBuild:
+  OtherIsceContainerCodeBuild:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: !Sub ${AWS::StackName}-stage-containers
+      Name: !Sub ${AWS::StackName}-other-isce-container
       Artifacts:
         Type: CODEPIPELINE
       Environment:
@@ -73,22 +68,24 @@ Resources:
         Type: CODEPIPELINE
         BuildSpec: !Sub |
           version: 0.2
-          env:
-            git-credential-helper: yes
+
           phases:
             install:
               runtime-versions:
                 python: 3.8
+              commands:
+              - apt update
+              - apt install -y python3-pip
             build:
               commands:
               - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${AWS::AccountId}.dkr.ecr.us-east-1.amazonaws.com | sed 's|https://||'
-              - echo "Logging into Docker Hub user..."
+              - echo "Logging into Docker Hub user"
               - dh_creds=$(aws secretsmanager get-secret-value --secret-id dockerhub/creds --query 'SecretString' | sed 's/\"//g' )
               - dh_username=$(echo $dh_creds | cut -f1 -d' ')
               - echo $dh_creds | cut -f2 -d' ' > dh.pass
               - cat dh.pass | docker login -u $dh_username --password-stdin
-              - cd stages
-              - bash build.sh $STAGE_NAME
+              - cd other/isce-native
+              - bash build.sh
 
   ProfileContainerCodeBuild:
     Type: AWS::CodeBuild::Project
@@ -161,7 +158,7 @@ Resources:
 
         - Name: !Sub ${AWS::StackName}-Build-Stage
           Actions:
-            - Name: stage-base
+            - Name: stage-isce-other
               RunOrder: 1
               ActionTypeId:
                 Category: Build
@@ -169,59 +166,18 @@ Resources:
                 Provider: CodeBuild
                 Version: "1"
               Configuration:
-                ProjectName: !Ref StageContainerCodeBuild
+                ProjectName: !Ref OtherIsceContainerCodeBuild
                 EnvironmentVariables: !Sub |
                   [
-                    {
-                      "value": "base",
-                      "name": "STAGE_NAME",
-                      "type": "PLAINTEXT"
-                    },
-                    {
-                      "value": "latest",
-                      "name": "STAGE_MATURITY",
-                      "type": "PLAINTEXT"
-                    },
-                    {
-                      "value": "true",
-                      "name": "STAGE_FORCE_BUILD",
-                      "type": "PLAINTEXT"
-                    },
-                    {
-                      "value": "${AWS::AccountId}.dkr.ecr.us-east-1.amazonaws.com/${AWS::StackName}",
-                      "name": "DOCKER_REGISTRY",
-                      "type": "PLAINTEXT"
-                    }
-                  ]
-              InputArtifacts:
-                - Name: SourceArtifact
-              OutputArtifacts: []
-              Region: !Sub ${AWS::Region}
-            - Name: stage-finale
-              RunOrder: 2
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Provider: CodeBuild
-                Version: "1"
-              Configuration:
-                ProjectName: !Ref StageContainerCodeBuild
-                EnvironmentVariables: !Sub |
-                  [
-                     {
-                        "value": "finale",
-                        "name": "STAGE_NAME",
-                        "type": "PLAINTEXT"
-                     },
                      {
                         "value": "latest",
                         "name": "STAGE_MATURITY",
                         "type": "PLAINTEXT"
                      },
                      {
-                        "value": "true",
-                        "name": "STAGE_FORCE_BUILD",
-                        "type": "PLAINTEXT"
+                       "value": "true",
+                       "name": "STAGE_FORCE_BUILD",
+                       "type": "PLAINTEXT"
                      },
                      {
                         "value": "${AWS::AccountId}.dkr.ecr.us-east-1.amazonaws.com/${AWS::StackName}",
@@ -236,7 +192,7 @@ Resources:
 
         - Name: !Sub ${AWS::StackName}-Build-Profiles
           Actions:
-            - Name: profiles-geos-626
+            - Name: profiles-server-type-1
               RunOrder: 1
               ActionTypeId:
                 Category: Build
@@ -253,43 +209,7 @@ Resources:
                         "type": "PLAINTEXT"
                      },
                      {
-                        "value": "geos_626",
-                        "name": "PROFILE_NAME",
-                        "type": "PLAINTEXT"
-                     },
-                     {
-                        "value": "latest",
-                        "name": "PROFILE_MATURITY",
-                        "type": "PLAINTEXT"
-                     },
-                     {
-                        "value": "true",
-                        "name": "STAGE_FORCE_BUILD",
-                        "type": "PLAINTEXT"
-                     }
-                  ]
-              InputArtifacts:
-                - Name: SourceArtifact
-              OutputArtifacts: []
-              Region: !Sub ${AWS::Region}
-            - Name: profiles-hub
-              RunOrder: 1
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Provider: CodeBuild
-                Version: "1"
-              Configuration:
-                ProjectName: !Ref ProfileContainerCodeBuild
-                EnvironmentVariables: !Sub |
-                  [
-                     {
-                        "value": "${AWS::AccountId}.dkr.ecr.us-east-1.amazonaws.com/${AWS::StackName}",
-                        "name": "DOCKER_REGISTRY",
-                        "type": "PLAINTEXT"
-                     },
-                     {
-                        "value": "hub",
+                        "value": "server_type_1",
                         "name": "PROFILE_NAME",
                         "type": "PLAINTEXT"
                      },
