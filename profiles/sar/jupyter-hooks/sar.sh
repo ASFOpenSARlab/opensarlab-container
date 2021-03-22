@@ -31,5 +31,7 @@ jupyter serverextension enable --py hide_code --user
 mkdir -p $HOME/.ipython/profile_default/startup/
 cp /etc/jupyter-hooks/custom_magics/00-df.py $HOME/.ipython/profile_default/startup/00-df.py
 
+gitpuller https://github.com/asfadmin/asf-jupyter-notebooks.git master $HOME/notebooks
+
 gitpuller https://github.com/asfadmin/asf-jupyter-docs.git master $HOME/opensarlab_docs
 python /etc/jupyter-hooks/scripts/osl_user_guides_to_ipynb.py -p $HOME/opensarlab_docs
