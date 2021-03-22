@@ -47,10 +47,10 @@ Resources:
     Properties:
       RepositoryName: !Sub "${AWS::StackName}/isce-native"
 
-  ServerTypeOneRepository:
+  SARRepository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: !Sub "${AWS::StackName}/server_type_1"
+      RepositoryName: !Sub "${AWS::StackName}/sar"
 
   OtherIsceContainerCodeBuild:
     Type: AWS::CodeBuild::Project
@@ -192,7 +192,7 @@ Resources:
 
         - Name: !Sub ${AWS::StackName}-Build-Profiles
           Actions:
-            - Name: profiles-server-type-1
+            - Name: profiles-sar
               RunOrder: 1
               ActionTypeId:
                 Category: Build
@@ -209,7 +209,7 @@ Resources:
                         "type": "PLAINTEXT"
                      },
                      {
-                        "value": "server_type_1",
+                        "value": "sar",
                         "name": "PROFILE_NAME",
                         "type": "PLAINTEXT"
                      },
