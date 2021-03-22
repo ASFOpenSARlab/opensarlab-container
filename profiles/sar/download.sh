@@ -10,16 +10,16 @@ fi
 
 # ISCE
 if [ ! -f topo.py ] ; then 
-    aws s3 sync --exclude '*' --include 'topo.py' s3://asf-jupyter-software/ . --profile=$AWS_PROFILE
+    aws s3 sync --exclude '*' --include 'topo.py' s3://osl-e-software/ . --profile=$AWS_PROFILE
 fi
 
 if [ ! -f unpackFrame_ALOS_raw.py ] ; then 
-    aws s3 sync --exclude '*' --include 'unpackFrame_ALOS_raw.py' s3://asf-jupyter-software/ . --profile=$AWS_PROFILE
+    aws s3 sync --exclude '*' --include 'unpackFrame_ALOS_raw.py' s3://osl-e-software/ . --profile=$AWS_PROFILE
 fi
 
 # MAPREADY 
 if [ ! -d mapready-build ] ; then
-    aws s3 sync --exclude '*' --include 'mapready-u18.zip' s3://asf-jupyter-software/ . --profile=$AWS_PROFILE
+    aws s3 sync --exclude '*' --include 'mapready-u18.zip' s3://osl-e-software/ . --profile=$AWS_PROFILE
     unzip mapready-u18.zip
     rm mapready-u18.zip 
 fi
