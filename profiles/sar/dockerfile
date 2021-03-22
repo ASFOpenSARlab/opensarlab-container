@@ -28,7 +28,7 @@ RUN pip install 'shapely==1.7.1' 'joblib==1.0.1' && \
 # Docs
 COPY ARIA-tools-docs ${ARIA_TOOLS_DOCS_HOME}
 
-RUN bash /tests/aria.sh
+#RUN bash /tests/aria.sh
 
 
 # TRAIN  ****************************************************************
@@ -43,7 +43,7 @@ RUN pip install 'numpy==1.20.1' 'netCDF4==1.5.6' 'scipy==1.6.1' 'hyp3lib==1.4.1'
 COPY TRAIN/ /usr/local/TRAIN/
 ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
 
-RUN bash /tests/train.sh
+#RUN bash /tests/train.sh
 
 
 # MINTPY  ****************************************************************
@@ -60,7 +60,7 @@ COPY PyAPS ${PYAPS_HOME}/pyaps3
 RUN conda install  -y --file $MINTPY_HOME/docs/conda.txt
 RUN pip install pykml -e git+https://github.com/yunjunz/pykml.git#egg=pykml
 
-RUN bash /tests/mintpy.sh
+#RUN bash /tests/mintpy.sh
 
 
 # MAPREADY ****************************************************************
@@ -92,7 +92,7 @@ COPY mapready-build/share/* $MAPREADY_HOME/share/
 
 ENV PATH $PATH:$MAPREADY_HOME/bin/:$MAPREADY_HOME/lib/:$MAPREADY_HOME/share/
 
-RUN bash /tests/mapready.sh
+#RUN bash /tests/mapready.sh
 
 
 # ISCE  ****************************************************************
@@ -118,7 +118,7 @@ RUN chmod 755 $ISCE_HOME/applications/*
 # So that users can temporarily add items to ISCE
 RUN chown -R jovyan:root $ISCE_HOME
 
-RUN bash /tests/isce.sh
+#RUN bash /tests/isce.sh
 
 
 # FINALE ****************************************************************
@@ -172,7 +172,7 @@ RUN apt update && \
     apt autoremove -y && \
     conda clean --yes --all
 
-RUN bash /tests/finale.sh
+#RUN bash /tests/finale.sh
 
 RUN rm -rf /home/jovyan/..?* /home/jovyan/.[!.]* /home/jovyan/*
 WORKDIR /home/jovyan
