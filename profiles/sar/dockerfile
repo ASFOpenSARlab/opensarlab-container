@@ -184,9 +184,9 @@ FROM release as testing
 
 RUN bash /tests/aria.sh
 RUN bash /tests/gdal.sh
-RUN bash /tests/general.sh
 RUN bash /tests/isce.sh
 RUN bash /tests/mapready.sh
 RUN bash /tests/mintpy.sh
 RUN bash /tests/train.sh
 RUN bash /tests/finale.sh
+RUN bash /tests/sar.sh
