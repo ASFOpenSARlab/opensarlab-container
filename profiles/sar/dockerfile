@@ -31,21 +31,6 @@ COPY ARIA-tools-docs ${ARIA_TOOLS_DOCS_HOME}
 #RUN bash /tests/aria.sh
 
 
-# TRAIN  ****************************************************************
-RUN apt install --no-install-recommends -y \
-    gdal-bin
-
-RUN conda install gdal
-
-# hyp3lib==1.4.1 cannot be changed
-RUN pip install 'numpy==1.20.1' 'netCDF4==1.5.6' 'scipy==1.6.1' 'hyp3lib==1.4.1'
-
-COPY TRAIN/ /usr/local/TRAIN/
-ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
-
-#RUN bash /tests/train.sh
-
-
 # MINTPY  ****************************************************************
 ENV MINTPY_HOME=/usr/local/MintPy
 ENV PYAPS_HOME=/usr/local/PyAPS
