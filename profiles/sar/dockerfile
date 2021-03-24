@@ -15,18 +15,18 @@ RUN apt update && \
 COPY tests/* /tests/
 
 # ARIA  ****************************************************************
-ENV ARIA_TOOLS_HOME=/usr/local/ARIA-tools
-ENV ARIA_TOOLS_DOCS_HOME=/usr/local/ARIA-tools-docs
-
-# Tools
-COPY ARIA-tools ${ARIA_TOOLS_HOME}
-RUN pip install 'shapely==1.7.1' 'joblib==1.0.1' && \
-    cd ${ARIA_TOOLS_HOME} && \
-    python setup.py install && \
-    cd /
-
-# Docs
-COPY ARIA-tools-docs ${ARIA_TOOLS_DOCS_HOME}
+# ENV ARIA_TOOLS_HOME=/usr/local/ARIA-tools
+# ENV ARIA_TOOLS_DOCS_HOME=/usr/local/ARIA-tools-docs
+#
+# # Tools
+# COPY ARIA-tools ${ARIA_TOOLS_HOME}
+# RUN pip install 'shapely==1.7.1' 'joblib==1.0.1' && \
+#     cd ${ARIA_TOOLS_HOME} && \
+#     python setup.py install && \
+#     cd /
+#
+# # Docs
+# COPY ARIA-tools-docs ${ARIA_TOOLS_DOCS_HOME}
 
 #RUN bash /tests/aria.sh
 
@@ -35,27 +35,27 @@ COPY ARIA-tools-docs ${ARIA_TOOLS_DOCS_HOME}
 RUN apt install --no-install-recommends -y \
     gdal-bin
 
-RUN conda install gdal
+# RUN conda install gdal
 
 # hyp3lib==1.4.1 cannot be changed
 # RUN pip install 'numpy==1.20.1' 'netCDF4==1.5.6' 'scipy==1.6.1' 'hyp3lib==1.4.1'
 
 COPY TRAIN/ /usr/local/TRAIN/
-ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
+# ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
 
 #RUN bash /tests/train.sh
 
 
-# MINTPY  ****************************************************************
-ENV MINTPY_HOME=/usr/local/MintPy
-ENV PYAPS_HOME=/usr/local/PyAPS
-ENV PATH=${PATH}:${MINTPY_HOME}/mintpy:${MINTPY_HOME}/sh
-ENV PYTHONPATH=${PYTHONPATH}:${MINTPY_HOME}:${PYAPS_HOME}
-ENV PROJ_LIB=/usr/share/proj
-
-# Pull and config mintpy and pyaps
-COPY MintPy ${MINTPY_HOME}
-COPY PyAPS ${PYAPS_HOME}/pyaps3
+# # MINTPY  ****************************************************************
+# ENV MINTPY_HOME=/usr/local/MintPy
+# ENV PYAPS_HOME=/usr/local/PyAPS
+# ENV PATH=${PATH}:${MINTPY_HOME}/mintpy:${MINTPY_HOME}/sh
+# ENV PYTHONPATH=${PYTHONPATH}:${MINTPY_HOME}:${PYAPS_HOME}
+# ENV PROJ_LIB=/usr/share/proj
+#
+# # Pull and config mintpy and pyaps
+# COPY MintPy ${MINTPY_HOME}
+# COPY PyAPS ${PYAPS_HOME}/pyaps3
 
 # RUN conda install  -y --file $MINTPY_HOME/docs/conda.txt
 # RUN pip install pykml -e git+https://github.com/yunjunz/pykml.git#egg=pykml
@@ -183,8 +183,8 @@ USER jovyan
 FROM release as testing 
 
 # RUN bash /tests/aria.sh
-RUN bash /tests/gdal.sh
-RUN bash /tests/isce.sh
+# RUN bash /tests/gdal.sh
+# RUN bash /tests/isce.sh
 RUN bash /tests/mapready.sh
 # RUN bash /tests/mintpy.sh
 # RUN bash /tests/train.sh
