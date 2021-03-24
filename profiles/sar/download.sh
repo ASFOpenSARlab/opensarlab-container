@@ -1,12 +1,12 @@
 set -e
 
 # ARIA
-if [ ! -d ARIA-tools ] ; then
-    git clone -b v1.1.1 --depth=1 --single-branch https://github.com/aria-tools/ARIA-tools.git ARIA-tools
-fi
-if [ ! -d ARIA-tools-docs ] ; then
-    git clone -b master --depth=1 --single-branch https://github.com/aria-tools/ARIA-tools-docs.git ARIA-tools-docs
-fi
+#if [ ! -d ARIA-tools ] ; then
+#    git clone -b v1.1.1 --depth=1 --single-branch https://github.com/aria-tools/ARIA-tools.git ARIA-tools
+#fi
+#if [ ! -d ARIA-tools-docs ] ; then
+#    git clone -b master --depth=1 --single-branch https://github.com/aria-tools/ARIA-tools-docs.git ARIA-tools-docs
+#fi
 
 # ISCE
 if [ ! -f topo.py ] ; then 
@@ -24,13 +24,13 @@ if [ ! -d mapready-build ] ; then
     rm mapready-u18.zip 
 fi
 
-# MIMTPY
-if [ ! -d MintPy ] ; then
-    git clone -b v1.2.2 --depth=1 --single-branch https://github.com/insarlab/MintPy.git
-fi
-if [ ! -d PyAPS ] ; then
-    git clone -b main --depth=1 --single-branch https://github.com/yunjunz/pyaps3.git PyAPS
-fi
+## MINTPY
+#if [ ! -d MintPy ] ; then
+#    git clone -b v1.2.2 --depth=1 --single-branch https://github.com/insarlab/MintPy.git
+#fi
+#if [ ! -d PyAPS ] ; then
+#    git clone -b main --depth=1 --single-branch https://github.com/yunjunz/pyaps3.git PyAPS
+#fi
 
 # TRAIN
 if [ ! -d TRAIN ] ; then
