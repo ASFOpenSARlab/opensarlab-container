@@ -30,6 +30,16 @@ COPY ARIA-tools-docs ${ARIA_TOOLS_DOCS_HOME}
 
 #RUN bash /tests/aria.sh
 
+# TRAIN  ****************************************************************
+RUN apt install --no-install-recommends -y \
+    gdal-bin
+
+RUN conda install gdal
+
+
+COPY TRAIN/ /usr/local/TRAIN/
+ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
+
 
 # MINTPY  ****************************************************************
 ENV MINTPY_HOME=/usr/local/MintPy
@@ -172,6 +182,5 @@ RUN bash /tests/gdal.sh
 RUN bash /tests/isce.sh
 RUN bash /tests/mapready.sh
 RUN bash /tests/mintpy.sh
-RUN bash /tests/train.sh
 RUN bash /tests/finale.sh
 RUN bash /tests/sar.sh
