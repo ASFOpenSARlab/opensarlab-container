@@ -176,6 +176,7 @@ RUN apt update && \
 
 RUN rm -rf /home/jovyan/..?* /home/jovyan/.[!.]* /home/jovyan/*
 WORKDIR /home/jovyan
+RUN conda init
 USER jovyan
 
 ##########################################

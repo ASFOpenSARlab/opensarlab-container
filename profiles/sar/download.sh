@@ -8,14 +8,14 @@ set -e
 #    git clone -b master --depth=1 --single-branch https://github.com/aria-tools/ARIA-tools-docs.git ARIA-tools-docs
 #fi
 
-# ISCE
-if [ ! -f topo.py ] ; then 
-    aws s3 sync --exclude '*' --include 'topo.py' s3://osl-e-software/ . --profile=$AWS_PROFILE
-fi
-
-if [ ! -f unpackFrame_ALOS_raw.py ] ; then 
-    aws s3 sync --exclude '*' --include 'unpackFrame_ALOS_raw.py' s3://osl-e-software/ . --profile=$AWS_PROFILE
-fi
+## ISCE
+#if [ ! -f topo.py ] ; then
+#    aws s3 sync --exclude '*' --include 'topo.py' s3://osl-e-software/ . --profile=$AWS_PROFILE
+#fi
+#
+#if [ ! -f unpackFrame_ALOS_raw.py ] ; then
+#    aws s3 sync --exclude '*' --include 'unpackFrame_ALOS_raw.py' s3://osl-e-software/ . --profile=$AWS_PROFILE
+#fi
 
 # MAPREADY 
 if [ ! -d mapready-build ] ; then
