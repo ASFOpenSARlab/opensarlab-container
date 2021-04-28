@@ -1,4 +1,4 @@
-FROM jupyter/base-notebook:hub-1.1.0 as release
+FROM jupyter/base-notebook:hub-1.3.0 as release
 
 # Base Stage ****************************************************************
 USER root
@@ -14,54 +14,15 @@ RUN apt update && \
 
 COPY tests/* /tests/
 
-# ARIA  ****************************************************************
-# ENV ARIA_TOOLS_HOME=/usr/local/ARIA-tools
-# ENV ARIA_TOOLS_DOCS_HOME=/usr/local/ARIA-tools-docs
-#
-# # Tools
-# COPY ARIA-tools ${ARIA_TOOLS_HOME}
-# RUN pip install 'shapely==1.7.1' 'joblib==1.0.1' && \
-#     cd ${ARIA_TOOLS_HOME} && \
-#     python setup.py install && \
-#     cd /
-#
-# # Docs
-# COPY ARIA-tools-docs ${ARIA_TOOLS_DOCS_HOME}
-
-#RUN bash /tests/aria.sh
-
+# SNAP  ****************************************************************
+RUN apt install --no-install-recommends -y \
+    default-jdk-headless
 
 # TRAIN  ****************************************************************
 RUN apt install --no-install-recommends -y \
     gdal-bin
 
-# RUN conda install gdal
-
-# hyp3lib==1.4.1 cannot be changed
-# RUN pip install 'numpy==1.20.1' 'netCDF4==1.5.6' 'scipy==1.6.1' 'hyp3lib==1.4.1'
-
 COPY TRAIN/ /usr/local/TRAIN/
-# ENV PYTHONPATH $PYTHONPATH:/usr/local/TRAIN/src
-
-#RUN bash /tests/train.sh
-
-
-# # MINTPY  ****************************************************************
-# ENV MINTPY_HOME=/usr/local/MintPy
-# ENV PYAPS_HOME=/usr/local/PyAPS
-# ENV PATH=${PATH}:${MINTPY_HOME}/mintpy:${MINTPY_HOME}/sh
-# ENV PYTHONPATH=${PYTHONPATH}:${MINTPY_HOME}:${PYAPS_HOME}
-# ENV PROJ_LIB=/usr/share/proj
-#
-# # Pull and config mintpy and pyaps
-# COPY MintPy ${MINTPY_HOME}
-# COPY PyAPS ${PYAPS_HOME}/pyaps3
-
-# RUN conda install  -y --file $MINTPY_HOME/docs/conda.txt
-# RUN pip install pykml -e git+https://github.com/yunjunz/pykml.git#egg=pykml
-
-#RUN bash /tests/mintpy.sh
-
 
 # MAPREADY ****************************************************************
 RUN set -e 
@@ -92,38 +53,6 @@ COPY mapready-build/share/* $MAPREADY_HOME/share/
 
 ENV PATH $PATH:$MAPREADY_HOME/bin/:$MAPREADY_HOME/lib/:$MAPREADY_HOME/share/
 
-#RUN bash /tests/mapready.sh
-
-
-# ISCE  ****************************************************************
-# ENV ISCE_HOME /opt/isce2/isce/
-# ENV PYTHONPATH $PYTHONPATH:/opt/isce2
-# ENV PATH $PATH:$ISCE_HOME/bin:$ISCE_HOME/applications
-
-# RUN apt install --no-install-recommends -y \
-#     libfftw3-dev \
-#     libxm4
-
-# RUN conda install gdal=3.2.1 libgcc=7.2.0 numpy=1.20.1 h5py=3.1.0 scipy=1.6.1
-
-# RUN cp /opt/conda/lib/libgdal.so.28 /opt/conda/lib/libgdal.so.26
-
-# COPY --from=isce-native: /opt/isce2/isce $ISCE_HOME
-#
-# # Add extra files to ISCE
-# COPY topo.py $ISCE_HOME/applications/
-# COPY unpackFrame_ALOS_raw.py $ISCE_HOME/applications/
-# RUN chmod 755 $ISCE_HOME/applications/*
-#
-# # So that users can temporarily add items to ISCE
-# RUN chown -R jovyan:root $ISCE_HOME
-
-#RUN bash /tests/isce.sh
-
-
-# FINALE ****************************************************************
-# RUN conda install -y scipy=1.6.1 numpy=1.20.1 matplotlib=3.3.4 pandas=1.2.3
-
 # Manually update nbconvert. A dicrepancy in the versioning causes a 500 when opening a notebook. https://github.com/jupyter/notebook/issues/3629#issuecomment-399408222
 # Remember, here pip is updating within the condas namespace where jupyter notebook items are held.
 RUN pip install --upgrade nbconvert
@@ -147,7 +76,7 @@ RUN apt update && \
         emacs \
         gnupg2
 
-RUN pip install 'awscli==1.19.33' 'boto3==1.17.32' 'pyyaml==5.4.1' 'bokeh==2.3.0'
+RUN pip install 'awscli==1.19.60' 'boto3==1.17.60' 'pyyaml==5.4.1' 'bokeh==2.3.1'
 
 # Install any other custom and jupyter libaries like widgets
 # Use pip (conda version) since we want to corner off GIAnT's work and also run it with Jupyter
@@ -172,8 +101,6 @@ RUN apt update && \
     apt autoremove -y && \
     conda clean --yes --all
 
-#RUN bash /tests/finale.sh
-
 RUN rm -rf /home/jovyan/..?* /home/jovyan/.[!.]* /home/jovyan/*
 WORKDIR /home/jovyan
 RUN conda init
@@ -183,11 +110,6 @@ USER jovyan
 
 FROM release as testing 
 
-# RUN bash /tests/aria.sh
-# RUN bash /tests/gdal.sh
-# RUN bash /tests/isce.sh
 RUN bash /tests/mapready.sh
-# RUN bash /tests/mintpy.sh
-# RUN bash /tests/train.sh
 RUN bash /tests/finale.sh
 RUN bash /tests/sar.sh
