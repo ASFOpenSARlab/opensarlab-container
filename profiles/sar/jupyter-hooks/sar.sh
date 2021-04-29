@@ -56,3 +56,14 @@ envs_dirs:
   - /opt/conda/envs
 EOT
 fi
+
+conda init
+
+BASH_PROFILE=$HOME/.bash_profile
+if ! test -f "$BASH_PROFILE"; then
+cat <<EOT>> $BASH_PROFILE
+if [ -s ~/.bashrc ]; then
+    source ~/.bashrc;
+fi
+EOT
+fi
