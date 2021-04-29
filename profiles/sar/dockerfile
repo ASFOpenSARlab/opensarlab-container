@@ -57,9 +57,6 @@ ENV PATH $PATH:$MAPREADY_HOME/bin/:$MAPREADY_HOME/lib/:$MAPREADY_HOME/share/
 # Remember, here pip is updating within the condas namespace where jupyter notebook items are held.
 RUN pip install --upgrade nbconvert
 
-# Update jupyter lab manually to get the lastest version
-RUN pip install -U jupyterlab
-
 # Downgrade tornado otherwise the notebook can't connect to the notebook server. https://github.com/jupyter/notebook/issues/2664#issuecomment-468954423
 RUN pip install tornado==5.1.1  # 4.5.3
 
@@ -85,6 +82,9 @@ RUN pip install 'awscli==1.19.60' 'boto3==1.17.60' 'pyyaml==5.4.1' 'bokeh==2.3.1
 # Use pip (conda version) since we want to corner off GIAnT's work and also run it with Jupyter
 RUN pip install asf-hyp3==3.0.3
 RUN conda install -c conda-forge jupyter_contrib_nbextensions=0.5.1 jupyter-resource-usage -y
+
+# Update jupyter lab manually to get the lastest version
+RUN pip install -U jupyterlab
 
 # Make sure that any files in the home directory are jovyan permission
 RUN chown -R jovyan:users $HOME/
