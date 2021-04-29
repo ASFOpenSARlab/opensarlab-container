@@ -37,55 +37,10 @@ Resources:
                   - "codecommit:GitPull"
                 Resource: !Sub 'arn:aws:codecommit:*:*:${CodeCommitSourceRepo}'
 
-  #HubRepository:
-  #  Type: AWS::ECR::Repository
-  #  Properties:
-  #    RepositoryName: !Sub "${AWS::StackName}/hub"
-
-  ISCENativeRepository:
-    Type: AWS::ECR::Repository
-    Properties:
-      RepositoryName: !Sub "${AWS::StackName}/isce-native"
-
   SARRepository:
     Type: AWS::ECR::Repository
     Properties:
       RepositoryName: !Sub "${AWS::StackName}/sar"
-
-  OtherIsceContainerCodeBuild:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Name: !Sub ${AWS::StackName}-other-isce-container
-      Artifacts:
-        Type: CODEPIPELINE
-      Environment:
-        Type: LINUX_CONTAINER
-        Image: aws/codebuild/standard:4.0
-        ComputeType: BUILD_GENERAL1_SMALL
-        PrivilegedMode: true
-      ServiceRole: !GetAtt ContainerPipelineRole.Arn
-      Source:
-        Type: CODEPIPELINE
-        BuildSpec: !Sub |
-          version: 0.2
-
-          phases:
-            install:
-              runtime-versions:
-                python: 3.8
-              commands:
-              - apt update
-              - apt install -y python3-pip
-            build:
-              commands:
-              - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${AWS::AccountId}.dkr.ecr.us-east-1.amazonaws.com | sed 's|https://||'
-              - echo "Logging into Docker Hub user"
-              - dh_creds=$(aws secretsmanager get-secret-value --secret-id dockerhub/creds --query 'SecretString' | sed 's/\"//g' )
-              - dh_username=$(echo $dh_creds | cut -f1 -d' ')
-              - echo $dh_creds | cut -f2 -d' ' > dh.pass
-              - cat dh.pass | docker login -u $dh_username --password-stdin
-              - cd other/isce-native
-              - bash build.sh
 
   ProfileContainerCodeBuild:
     Type: AWS::CodeBuild::Project
@@ -155,40 +110,6 @@ Resources:
                 - Name: SourceArtifact
               Region: !Sub ${AWS::Region}
               Namespace: SourceVariables
-
-        - Name: !Sub ${AWS::StackName}-Build-Stage
-          Actions:
-            - Name: stage-isce-other
-              RunOrder: 1
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Provider: CodeBuild
-                Version: "1"
-              Configuration:
-                ProjectName: !Ref OtherIsceContainerCodeBuild
-                EnvironmentVariables: !Sub |
-                  [
-                     {
-                        "value": "latest",
-                        "name": "STAGE_MATURITY",
-                        "type": "PLAINTEXT"
-                     },
-                     {
-                       "value": "true",
-                       "name": "STAGE_FORCE_BUILD",
-                       "type": "PLAINTEXT"
-                     },
-                     {
-                        "value": "${AWS::AccountId}.dkr.ecr.us-east-1.amazonaws.com/${AWS::StackName}",
-                        "name": "DOCKER_REGISTRY",
-                        "type": "PLAINTEXT"
-                     }
-                  ]
-              InputArtifacts:
-                - Name: SourceArtifact
-              OutputArtifacts: []
-              Region: !Sub ${AWS::Region}
 
         - Name: !Sub ${AWS::StackName}-Build-Profiles
           Actions:

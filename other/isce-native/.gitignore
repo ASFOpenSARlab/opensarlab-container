@@ -1,6 +1,0 @@
-*
-!.gitignore
-!build.sh
-!local-build.sh
-!local-build-all.sh
-!dockerfile
