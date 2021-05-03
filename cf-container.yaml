@@ -10,6 +10,10 @@ Parameters:
     Type: String
     Default: ''
 
+  CostTagValue:
+    Type: String
+    Default: "osl-daac"
+
 Resources:
 
   ContainerPipelineRole:
@@ -41,6 +45,9 @@ Resources:
     Type: AWS::ECR::Repository
     Properties:
       RepositoryName: !Sub "${AWS::StackName}/sar"
+      Tags:
+        - Key: osl-stackname
+          Value: !Sub ${CostTagValue}
 
   ProfileContainerCodeBuild:
     Type: AWS::CodeBuild::Project
@@ -54,6 +61,9 @@ Resources:
         ComputeType: BUILD_GENERAL1_SMALL
         PrivilegedMode: true
       ServiceRole: !GetAtt ContainerPipelineRole.Arn
+      Tags:
+        - Key: osl-stackname
+          Value: !Sub ${CostTagValue}
       Source:
         Type: CODEPIPELINE
         BuildSpec: !Sub |
@@ -84,6 +94,9 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub codepipeline-${AWS::Region}-${AWS::StackName}-container
+      Tags:
+        - Key: osl-stackname
+          Value: !Sub ${CostTagValue}
 
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
@@ -94,6 +107,9 @@ Resources:
       Name: !Sub ${AWS::StackName}-Container-Pipeline
       RestartExecutionOnUpdate: False
       RoleArn: !GetAtt ContainerPipelineRole.Arn
+      Tags: 
+        - Key: osl-stackname
+          Value: !Sub ${CostTagValue}
       Stages:
         - Name: !Sub ${AWS::StackName}-Source
           Actions:
