@@ -98,6 +98,10 @@ COPY jupyter-hooks /etc/jupyter-hooks
 RUN chmod -R 755 /etc/jupyter-hooks && \
     chown -R jovyan:users /etc/jupyter-hooks
 
+# Customize home page
+COPY jupyter-files/tree.html /opt/conda/lib/python3.8/site-packages/notebook/templates/tree.html
+COPY jupyter-files/notifications.js /opt/conda/lib/python3.8/site-packages/notebook/static/tree/js/notifications.js
+
 # Clean up a few other things at the end
 RUN apt update && \
     rm -rf /var/lib/apt/lists/* && \
