@@ -13,8 +13,6 @@ pip install --user \
     pandoc==2.0a4 \
     pypandoc
 
-conda install -c conda-forge nb_conda_kernels
-
 # copy over our version of pull.py
 # REMINDER: REMOVE IF CHANGES ARE MERGED TO NBGITPULLER
 cp /etc/jupyter-hooks/scripts/pull.py /home/jovyan/.local/lib/python3.8/site-packages/nbgitpuller/pull.py
@@ -39,37 +37,6 @@ gitpuller https://github.com/asfadmin/asf-jupyter-envs.git main $HOME/conda_envi
 
 gitpuller https://github.com/asfadmin/asf-jupyter-docs.git master $HOME/opensarlab_docs
 python /etc/jupyter-hooks/scripts/osl_user_guides_to_ipynb.py -p $HOME/opensarlab_docs
-
-RIGHT_NOW=$(date)
-# "If the delimiting identifier is unquoted, the shell will substitute all variables, 
-# commands and special characters before passing the here-document lines to the command."
-cat <<EOF > $HOME/.notifications
-{
-    "notifications": [
-        {
-            "date_expires": "01-01-2021",
-            "message": "Too old",
-            "type": "info"
-        },
-        {
-            "date_expires": "05-13-2021",
-            "message": "Hello there!!",
-            "type": "success"
-        },
-        {
-            "date_expires": "05-14-2021",
-            "message": "There will be an outage starting on 14 May 2021. For more info, go to <a href='opensarlab_docs/README.md' target='_blank'><span style='color: orange'>opensarlab</span></a>.",
-            "type": "warning"
-        },
-        {
-            "date_expires": "01-01-9999",
-            "message": "This will stay forever!!",
-            "type": "error"
-        }
-    ],
-    "last_server_start": "$RIGHT_NOW"
-}
-EOF
 
 CONDARC=$HOME/.condarc
 if ! test -f "$CONDARC"; then
