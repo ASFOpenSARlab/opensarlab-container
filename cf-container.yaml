@@ -1,0 +1,173 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+
+  CodeCommitSourceRepo:
+    Type: String
+    Description: "Name of the code commit repo holding your opensarlab-cluster code"
+    Default: ''
+
+  CodeCommitSourceBranch:
+    Type: String
+    Description: "Name of the branch holding this deployment's cluster code"
+    Default: ''
+
+  CostTagValue:
+    Type: String
+    Description: "The value of the cost tag used for filtering the budget, etc."
+    Default: "" # should match CostTagValue used in cloudformation.yaml and cf-pipeline.yaml
+
+Resources:
+
+  ContainerPipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-container-pipeline-role
+      AssumeRolePolicyDocument:
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: 
+              - cloudformation.amazonaws.com
+              - codebuild.amazonaws.com
+              - codepipeline.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+      Policies:
+        - PolicyName: !Sub ${AWS::StackName}-container-pipeline-policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "codecommit:GitPull"
+                Resource: !Sub 'arn:aws:codecommit:*:*:${CodeCommitSourceRepo}'
+
+  SARRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub "${AWS::StackName}/sar"
+      Tags:
+        - Key: osl-stackname
+          Value: !Sub ${CostTagValue}
+
+  ProfileContainerCodeBuild:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub ${AWS::StackName}-profile-containers
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        Image: aws/codebuild/standard:4.0
+        ComputeType: BUILD_GENERAL1_SMALL
+        PrivilegedMode: true
+      ServiceRole: !GetAtt ContainerPipelineRole.Arn
+      Tags:
+        - Key: osl-stackname
+          Value: !Sub ${CostTagValue}
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: !Sub |
+          version: 0.2
+
+          env:
+            git-credential-helper: yes
+
+          phases:
+            install:
+              runtime-versions:
+                python: 3.8
+              commands:
+              - apt update
+              - apt install -y python3-pip
+            build:
+              commands:
+              - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${AWS::AccountId}.dkr.ecr.us-east-1.amazonaws.com | sed 's|https://||'
+              - echo "Logging into Docker Hub user..."
+              - dh_creds=$(aws secretsmanager get-secret-value --secret-id dockerhub/creds --query 'SecretString' | sed 's/\"//g' )
+              - dh_username=$(echo $dh_creds | cut -f1 -d' ')
+              - echo $dh_creds | cut -f2 -d' ' > dh.pass
+              - cat dh.pass | docker login -u $dh_username --password-stdin
+              - cd profiles/$PROFILE_NAME
+              - bash build.sh
+
+  PipelineBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub codepipeline-${AWS::Region}-${AWS::StackName}-container
+      Tags:
+        - Key: osl-stackname
+          Value: !Sub ${CostTagValue}
+
+  Pipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties: 
+      ArtifactStore: 
+        Type: S3
+        Location: !Ref PipelineBucket
+      Name: !Sub ${AWS::StackName}-Container-Pipeline
+      RestartExecutionOnUpdate: False
+      RoleArn: !GetAtt ContainerPipelineRole.Arn
+      Tags: 
+        - Key: osl-stackname
+          Value: !Sub ${CostTagValue}
+      Stages:
+        - Name: !Sub ${AWS::StackName}-Source
+          Actions:
+            - Name: Source
+              RunOrder: 1
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Provider: CodeCommit
+                Version: "1"
+              Configuration:
+                BranchName: !Sub ${CodeCommitSourceBranch}
+                OutputArtifactFormat: CODEBUILD_CLONE_REF
+                PollForSourceChanges: "false"
+                RepositoryName: !Sub ${CodeCommitSourceRepo}
+              OutputArtifacts:
+                - Name: SourceArtifact
+              Region: !Sub ${AWS::Region}
+              Namespace: SourceVariables
+
+        - Name: !Sub ${AWS::StackName}-Build-Profiles
+          Actions:
+            - Name: profiles-sar
+              RunOrder: 1
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: "1"
+              Configuration:
+                ProjectName: !Ref ProfileContainerCodeBuild
+                EnvironmentVariables: !Sub |
+                  [
+                     {
+                        "value": "${AWS::AccountId}.dkr.ecr.us-east-1.amazonaws.com/${AWS::StackName}",
+                        "name": "DOCKER_REGISTRY",
+                        "type": "PLAINTEXT"
+                     },
+                     {
+                        "value": "sar",
+                        "name": "PROFILE_NAME",
+                        "type": "PLAINTEXT"
+                     },
+                     {
+                        "value": "latest",
+                        "name": "PROFILE_MATURITY",
+                        "type": "PLAINTEXT"
+                     },
+                     {
+                        "value": "true",
+                        "name": "STAGE_FORCE_BUILD",
+                        "type": "PLAINTEXT"
+                     }
+                  ]
+              InputArtifacts:
+                - Name: SourceArtifact
+              OutputArtifacts: []
+              Region: !Sub ${AWS::Region}
