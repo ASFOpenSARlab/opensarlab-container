@@ -51,7 +51,8 @@ RUN apt update && \
         openssh-client \
         libgl1-mesa-glx \
         emacs \
-        gnupg2
+        gnupg2 \
+        jq
 
 RUN pip install 'awscli==1.19.60' 'boto3==1.17.60' 'pyyaml==5.4.1' 'bokeh==2.3.1'
 

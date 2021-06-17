@@ -58,11 +58,17 @@ envs_dirs:
 EOT
 fi
 
+JN_CONFIG=$HOME/.jupyter/jupyter_notebook_config.json
+if ! grep -q "\"CondaKernelSpecManager\":" "$JN_CONFIG"; then
+jq '. += {"CondaKernelSpecManager": {"name_format": "{display_name}", "env_filter": ".*opt/conda.*"}}' "$JN_CONFIG" >> temp;
+mv temp "$JN_CONFIG";
+fi
+
 conda init
 
 BASH_PROFILE=$HOME/.bash_profile
 if ! test -f "$BASH_PROFILE"; then
-cat <<EOT>> $BASH_PROFILE
+cat <<EOT >> $BASH_PROFILE
 if [ -s ~/.bashrc ]; then
     source ~/.bashrc;
 fi
