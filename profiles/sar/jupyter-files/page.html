@@ -2,6 +2,9 @@
 {# This template assumes that the original page.html is renamed original_page.html #}
 
 {% block login_widget %}
+ <span id="user-docs-github-link" style="padding: 6px;">
+  <a href="https://github.com/ASFOpenSARlab/opensarlab-docs/blob/master/user_docs/OpenSARlab_user_guide.md" target="_blank"><u>User Docs</u></a> &nbsp; &nbsp;
+ </span>
  <span id="server-profile-name" style="padding: 6px;">{{ PROFILE_NAME }} &nbsp; &nbsp; </span>
  {{ super() }}
 {% endblock %}
