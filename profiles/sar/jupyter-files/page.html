@@ -1,0 +1,7 @@
+{% extends "original_page.html" %}
+{# This template assumes that the original page.html is renamed original_page.html #}
+
+{% block login_widget %}
+ <span id="server-profile-name" style="padding: 6px;">{{ PROFILE_NAME }} &nbsp; &nbsp; </span>
+ {{ super() }}
+{% endblock %}
