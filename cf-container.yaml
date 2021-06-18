@@ -4,12 +4,12 @@ Parameters:
 
   CodeCommitSourceRepo:
     Type: String
-    Description: "Name of the code commit repo holding your opensarlab-cluster code"
+    Description: "Name of the code commit repo holding your opensarlab-container code"
     Default: ''
 
   CodeCommitSourceBranch:
     Type: String
-    Description: "Name of the branch holding this deployment's cluster code"
+    Description: "Name of the branch holding this deployment's container code"
     Default: ''
 
   CostTagValue:
