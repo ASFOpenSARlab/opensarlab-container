@@ -43,7 +43,9 @@ Resources:
                 Action:
                   - "codecommit:GitPull"
                 Resource: !Sub 'arn:aws:codecommit:*:*:${CodeCommitSourceRepo}'
-
+# TODO Change the name of SARRepository so it makes sense given the profile or profiles that will use it
+# TODO Add additional repository resources for additional images
+# TODO Change the "/sar" portion of RepositoryName to use a namespace that makes sense for your image
   SARRepository:
     Type: AWS::ECR::Repository
     Properties:
@@ -133,6 +135,8 @@ Resources:
               Region: !Sub ${AWS::Region}
               Namespace: SourceVariables
 
+# TODO Change "Name: profiles-sar" to "Name: profiles-<namespace you used in above RepositoryName>"
+# TODO Change the EnvironmentVariables PROFILE_NAME value from "sar" to your image's namespace
         - Name: !Sub ${AWS::StackName}-Build-Profiles
           Actions:
             - Name: profiles-sar

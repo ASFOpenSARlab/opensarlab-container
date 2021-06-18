@@ -15,6 +15,8 @@ if [ "$STAGE_FORCE_BUILD" = 'true' ]; then
     COMMIT_HEAD=$(git rev-parse --short HEAD)
 
     time docker build -f dockerfile.build --target testing .
+
+    # TODO Change 3 $DOCKER_REGISTRY namespaces from "sar" to your image namespace
     time docker build -f dockerfile.build \
         -t $DOCKER_REGISTRY/sar:$BUILD_TAG \
         -t $DOCKER_REGISTRY/sar:$PROFILE_MATURITY \
@@ -22,6 +24,7 @@ if [ "$STAGE_FORCE_BUILD" = 'true' ]; then
         --target release .
 
     # Push to registry
+    # TODO Change 3 $DOCKER_REGISTRY namespaces from "sar" to your image namespace
     docker push $DOCKER_REGISTRY/sar:$BUILD_TAG
     docker push $DOCKER_REGISTRY/sar:$PROFILE_MATURITY
     docker push $DOCKER_REGISTRY/sar:$COMMIT_HEAD
