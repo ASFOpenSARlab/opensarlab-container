@@ -12,6 +12,11 @@ Parameters:
     Description: "Name of the branch holding this deployment's container code"
     Default: ''
 
+  CostTagKey:
+    Type: String
+    Description: "The name of the cost allocation tag you set up in AWS to track deployment costs, i.e. deployment_name"
+    Default: ""
+
   CostTagValue:
     Type: String
     Description: "The value of the cost tag used for filtering the budget, etc."
@@ -51,7 +56,7 @@ Resources:
     Properties:
       RepositoryName: !Sub "${AWS::StackName}/sar"
       Tags:
-        - Key: osl-stackname
+        - Key: !Sub ${CostTagKey}
           Value: !Sub ${CostTagValue}
 
   ImageContainerCodeBuild:
@@ -67,7 +72,7 @@ Resources:
         PrivilegedMode: true
       ServiceRole: !GetAtt ContainerPipelineRole.Arn
       Tags:
-        - Key: osl-stackname
+        - Key: !Sub ${CostTagKey}
           Value: !Sub ${CostTagValue}
       Source:
         Type: CODEPIPELINE
@@ -100,7 +105,7 @@ Resources:
     Properties:
       BucketName: !Sub codepipeline-${AWS::Region}-${AWS::StackName}-container
       Tags:
-        - Key: osl-stackname
+        - Key: !Sub ${CostTagKey}
           Value: !Sub ${CostTagValue}
 
   Pipeline:
@@ -113,7 +118,7 @@ Resources:
       RestartExecutionOnUpdate: False
       RoleArn: !GetAtt ContainerPipelineRole.Arn
       Tags: 
-        - Key: osl-stackname
+        - Key: !Sub ${CostTagKey}
           Value: !Sub ${CostTagValue}
       Stages:
         - Name: !Sub ${AWS::StackName}-Source
