@@ -1,11 +1,6 @@
 {% extends "original_tree.html" %}
 {# This template assumes that the original tree.html is renamed original_tree.html #}
 
-{% block login_widget %}
-    <span id="server-profile-name" style="padding: 6px;">{{ PROFILE_NAME }} &nbsp; &nbsp; </span>
-    {{ super() }}
-{% endblock %}
-
 {% block script %}
     {{ super() }}
 

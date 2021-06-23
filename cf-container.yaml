@@ -43,9 +43,9 @@ Resources:
                 Action:
                   - "codecommit:GitPull"
                 Resource: !Sub 'arn:aws:codecommit:*:*:${CodeCommitSourceRepo}'
-# TODO Change the name of SARRepository so it makes sense given the profile or profiles that will use it
+# TODO Change the name of SARRepository so it makes sense given the image that will be stored in it
 # TODO Add additional repository resources for additional images
-# TODO Change the "/sar" portion of RepositoryName to use a namespace that makes sense for your image
+# TODO Change the "/sar" portion of RepositoryName to use a namespace matching the name of your image
   SARRepository:
     Type: AWS::ECR::Repository
     Properties:
@@ -54,10 +54,10 @@ Resources:
         - Key: osl-stackname
           Value: !Sub ${CostTagValue}
 
-  ProfileContainerCodeBuild:
+  ImageContainerCodeBuild:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: !Sub ${AWS::StackName}-profile-containers
+      Name: !Sub ${AWS::StackName}-image-containers
       Artifacts:
         Type: CODEPIPELINE
       Environment:
@@ -92,7 +92,7 @@ Resources:
               - dh_username=$(echo $dh_creds | cut -f1 -d' ')
               - echo $dh_creds | cut -f2 -d' ' > dh.pass
               - cat dh.pass | docker login -u $dh_username --password-stdin
-              - cd profiles/$PROFILE_NAME
+              - cd images/$IMAGE_NAME
               - bash build.sh
 
   PipelineBucket:
@@ -135,11 +135,11 @@ Resources:
               Region: !Sub ${AWS::Region}
               Namespace: SourceVariables
 
-# TODO Change "Name: profiles-sar" to "Name: profiles-<namespace you used in above RepositoryName>"
-# TODO Change the EnvironmentVariables PROFILE_NAME value from "sar" to your image's namespace
-        - Name: !Sub ${AWS::StackName}-Build-Profiles
+# TODO Change "Name: images-sar" to "Name: images-<namespace you used in above RepositoryName>"
+# TODO Change the EnvironmentVariables IMAGE_NAME value from "sar" to your image's name
+        - Name: !Sub ${AWS::StackName}-Build-Images
           Actions:
-            - Name: profiles-sar
+            - Name: images-sar
               RunOrder: 1
               ActionTypeId:
                 Category: Build
@@ -147,7 +147,7 @@ Resources:
                 Provider: CodeBuild
                 Version: "1"
               Configuration:
-                ProjectName: !Ref ProfileContainerCodeBuild
+                ProjectName: !Ref ImageContainerCodeBuild
                 EnvironmentVariables: !Sub |
                   [
                      {
@@ -157,12 +157,12 @@ Resources:
                      },
                      {
                         "value": "sar",
-                        "name": "PROFILE_NAME",
+                        "name": "IMAGE_NAME",
                         "type": "PLAINTEXT"
                      },
                      {
                         "value": "latest",
-                        "name": "PROFILE_MATURITY",
+                        "name": "IMAGE_TAG",
                         "type": "PLAINTEXT"
                      },
                      {

@@ -23,7 +23,7 @@ jupyter nbextension enable --py hide_code --user
 jupyter serverextension enable --py hide_code --user
 
 # Copy custom jupyter magic command, df (displays available disc space on volume)
-mkdir -p $HOME/.ipython/profile_default/startup/
-cp /etc/jupyter-hooks/custom_magics/00-df.py $HOME/.ipython/profile_default/startup/00-df.py
+mkdir -p $HOME/.ipython/image_default/startup/
+cp /etc/jupyter-hooks/custom_magics/00-df.py $HOME/.ipython/image_default/startup/00-df.py
 
 echo 'No git puller enabled.'
