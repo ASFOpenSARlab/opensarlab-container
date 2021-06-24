@@ -1,0 +1,104 @@
+FROM jupyter/base-notebook:hub-1.1.0 as release
+
+# Base Stage ****************************************************************
+USER root
+WORKDIR /
+
+RUN apt update && \
+    apt install --no-install-recommends -y \
+        software-properties-common \
+        git && \
+    add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable && \
+    apt update && \
+    apt upgrade -y
+
+COPY tests/* /tests/
+
+RUN apt install -y \
+    proj-bin \
+    geotiff-bin \
+    libshp-dev \
+    libshp2 \
+    libhdf5-dev \
+    libnetcdf-dev \
+    libgdal-dev \
+    libgsl-dev
+
+RUN cp /usr/lib/x86_64-linux-gnu/libgeotiff.so.5 /usr/lib/x86_64-linux-gnu/libgeotiff.so.2 && \
+    cp /usr/lib/libgdal.so /usr/lib/libgdal.so.20 && \
+    cp /usr/lib/x86_64-linux-gnu/libproj.so.19 /usr/lib/x86_64-linux-gnu/libproj.so.12 && \
+    cp /usr/lib/x86_64-linux-gnu/libhdf5_serial.so.103 /usr/lib/x86_64-linux-gnu/libhdf5_serial.so.100 && \
+    cp /usr/lib/x86_64-linux-gnu/libnetcdf.so.15 /usr/lib/x86_64-linux-gnu/libnetcdf.so.13
+
+# Manually update nbconvert. A dicrepancy in the versioning causes a 500 when opening a notebook. https://github.com/jupyter/notebook/issues/3629#issuecomment-399408222
+# Remember, here pip is updating within the condas namespace where jupyter notebook items are held.
+RUN pip install --upgrade nbconvert
+
+# Downgrade tornado otherwise the notebook can't connect to the notebook server. https://github.com/jupyter/notebook/issues/2664#issuecomment-468954423
+RUN pip install tornado==5.1.1
+
+# Install general items. If a library is needed for a specific piece of software, put it with that software.
+RUN apt update && \
+    apt install --fix-missing --no-install-recommends -y \
+        zip \
+        unzip \
+        wget \
+        vim \
+        rsync \
+        less \
+        snaphu \
+        curl \
+        openssh-client \
+        libgl1-mesa-glx \
+        emacs \
+        gnupg2 \
+        jq
+
+RUN pip install 'awscli==1.19.60' 'boto3==1.17.60' 'pyyaml==5.4.1' 'bokeh==2.3.1'
+
+# Install any other custom and jupyter libaries like widgets
+# Use pip (conda version) since we want to corner off GIAnT's work and also run it with Jupyter
+RUN conda install -c conda-forge jupyter_contrib_nbextensions=0.5.1 jupyter-resource-usage nb_conda_kernels -y
+
+# Update jupyter lab manually to get the lastest version
+RUN pip install -U jupyterlab
+
+# Make sure that any files in the home directory are jovyan permission
+RUN chown -R jovyan:users $HOME/
+
+# Add sudo group user 599 elevation
+RUN addgroup -gid 599 elevation \
+    && echo '%elevation ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+
+# Add jupyter hooks
+COPY jupyter-hooks /etc/jupyter-hooks
+RUN chmod -R 755 /etc/jupyter-hooks && \
+    chown -R jovyan:users /etc/jupyter-hooks
+
+# Customize home page
+RUN mv /opt/conda/lib/python3.8/site-packages/notebook/templates/tree.html /opt/conda/lib/python3.8/site-packages/notebook/templates/original_tree.html
+COPY jupyter-files/tree.html /opt/conda/lib/python3.8/site-packages/notebook/templates/tree.html
+
+RUN mv /opt/conda/lib/python3.8/site-packages/notebook/templates/page.html /opt/conda/lib/python3.8/site-packages/notebook/templates/original_page.html
+COPY jupyter-files/page.html /opt/conda/lib/python3.8/site-packages/notebook/templates/page.html
+
+RUN chmod -R 755 /opt/conda/lib/python3.8/site-packages/notebook/templates/ && \
+  	chown -R jovyan:users /opt/conda/lib/python3.8/site-packages/notebook/templates/
+
+# Clean up a few other things at the end
+RUN apt update && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt autoremove -y && \
+    conda clean --yes --all
+
+RUN rm -rf /home/jovyan/..?* /home/jovyan/.[!.]* /home/jovyan/*
+WORKDIR /home/jovyan
+RUN conda init
+USER jovyan
+
+##########################################
+
+FROM release as testing 
+
+RUN bash /tests/finale.sh
+RUN bash /tests/sar.sh

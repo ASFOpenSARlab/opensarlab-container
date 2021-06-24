@@ -1,0 +1,9 @@
+*
+local-build.sh 
+!.gitignore
+!jupyter-hooks/
+!jupyter-hooks/**
+!build.sh
+!dockerfile
+!jupyter-files/
+!jupyter-files/**
