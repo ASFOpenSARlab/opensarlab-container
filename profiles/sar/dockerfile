@@ -81,7 +81,7 @@ RUN pip install 'awscli==1.19.60' 'boto3==1.17.60' 'pyyaml==5.4.1' 'bokeh==2.3.1
 # Install any other custom and jupyter libaries like widgets
 # Use pip (conda version) since we want to corner off GIAnT's work and also run it with Jupyter
 RUN pip install asf-hyp3==3.0.3
-RUN conda install -c conda-forge jupyter_contrib_nbextensions=0.5.1 jupyter-resource-usage nb_conda_kernels jupyter-packaging cookiecutter nodejs yarn -y
+RUN conda install -c conda-forge jupyter_contrib_nbextensions=0.5.1 jupyter-resource-usage nb_conda_kernels -y
 
 # Update jupyter lab manually to get the lastest version
 RUN pip install -U jupyterlab
@@ -99,8 +99,8 @@ RUN chmod -R 755 /etc/jupyter-hooks && \
     chown -R jovyan:users /etc/jupyter-hooks
 
 # Customize home page
-COPY jupyter-files/tree.html /opt/conda/lib/python3.8/site-packages/notebook/templates/tree.html
 RUN mv /opt/conda/lib/python3.8/site-packages/notebook/templates/tree.html /opt/conda/lib/python3.8/site-packages/notebook/templates/original_tree.html
+COPY jupyter-files/tree.html /opt/conda/lib/python3.8/site-packages/notebook/templates/tree.html
 RUN chmod -R 755 /opt/conda/lib/python3.8/site-packages/notebook/templates/ && \
   	chown -R jovyan:users /opt/conda/lib/python3.8/site-packages/notebook/templates/
 
@@ -111,15 +111,8 @@ RUN apt update && \
     conda clean --yes --all
 
 RUN rm -rf /home/jovyan/..?* /home/jovyan/.[!.]* /home/jovyan/*
-
-RUN git clone https://github.com/ASFOpenSARlab/url_widget.git /opt/conda/lib/site-packages/url_widget
-
-
 WORKDIR /home/jovyan
 RUN conda init
-
-RUN cd /opt/conda/lib/site-packages/url_widget && python -m pip install -e . && jupyter labextension develop . --overwrite && yarn run build
-
 USER jovyan
 
 ##########################################
