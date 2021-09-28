@@ -1,11 +1,6 @@
 {% extends "original_tree.html" %}
 {# This template assumes that the original tree.html is renamed original_tree.html #}
 
-{% block login_widget %}
-    <span id="server-profile-name" style="padding: 6px;">{{ PROFILE_NAME }} &nbsp; &nbsp; </span>
-    {{ super() }}
-{% endblock %}
-
 {% block script %}
     {{ super() }}
 
@@ -15,7 +10,7 @@
         require.config({paths: {toastr: "https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min"}});
 
         require([
-            'jquery', 
+            'jquery',
             'toastr'
         ], function ($, toastr) {
 
@@ -36,7 +31,7 @@
                 "hideMethod": "fadeOut"
             }
 
-            fetch('/services/notifications/?profile={{ PROFILE_NAME }}' )
+            fetch(window.location.origin + '/services/notifications/?profile={{ PROFILE_NAME }}' )
                 .then( response => response.json() )
                 .then( notes => {
                     console.log(notes)

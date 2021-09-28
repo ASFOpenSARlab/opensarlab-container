@@ -99,8 +99,14 @@ RUN chmod -R 755 /etc/jupyter-hooks && \
     chown -R jovyan:users /etc/jupyter-hooks
 
 # Customize home page
+# Customize home page
 RUN mv /opt/conda/lib/python3.8/site-packages/notebook/templates/tree.html /opt/conda/lib/python3.8/site-packages/notebook/templates/original_tree.html
 COPY jupyter-files/tree.html /opt/conda/lib/python3.8/site-packages/notebook/templates/tree.html
+
+RUN mv /opt/conda/lib/python3.8/site-packages/notebook/templates/page.html /opt/conda/lib/python3.8/site-packages/notebook/templates/original_page.html
+COPY jupyter-files/page.html /opt/conda/lib/python3.8/site-packages/notebook/templates/page.html
+
+
 RUN chmod -R 755 /opt/conda/lib/python3.8/site-packages/notebook/templates/ && \
   	chown -R jovyan:users /opt/conda/lib/python3.8/site-packages/notebook/templates/
 
