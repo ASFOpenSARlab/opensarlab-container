@@ -48,7 +48,7 @@ Resources:
   SARRepository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: !Sub "${AWS::Region}-${AWS::StackName}/sar"
+      RepositoryName: !Sub "${AWS::StackName}/sar"
       Tags:
         - Key: !Sub ${CostTagKey}
           Value: !Sub ${CostTagValue}
