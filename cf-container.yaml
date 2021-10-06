@@ -10,9 +10,13 @@ Parameters:
     Type: String
     Default: ''
 
+  CostTagKey:
+    Type: String
+    Default: "osl-billing"
+
   CostTagValue:
     Type: String
-    Default: "osl-daac"
+    Default: ''
 
 Resources:
 
@@ -46,7 +50,7 @@ Resources:
     Properties:
       RepositoryName: !Sub "${AWS::StackName}/sar"
       Tags:
-        - Key: osl-stackname
+        - Key: !Sub ${CostTagKey}
           Value: !Sub ${CostTagValue}
 
   ProfileContainerCodeBuild:
@@ -62,7 +66,7 @@ Resources:
         PrivilegedMode: true
       ServiceRole: !GetAtt ContainerPipelineRole.Arn
       Tags:
-        - Key: osl-stackname
+        - Key: !Sub ${CostTagKey}
           Value: !Sub ${CostTagValue}
       Source:
         Type: CODEPIPELINE
@@ -81,7 +85,7 @@ Resources:
               - apt install -y python3-pip
             build:
               commands:
-              - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${AWS::AccountId}.dkr.ecr.us-east-1.amazonaws.com | sed 's|https://||'
+              - aws ecr get-login-password --region ${AWS::Region} | docker login --username AWS --password-stdin ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com | sed 's|https://||'
               - echo "Logging into Docker Hub user..."
               - dh_creds=$(aws secretsmanager get-secret-value --secret-id dockerhub/creds --query 'SecretString' | sed 's/\"//g' )
               - dh_username=$(echo $dh_creds | cut -f1 -d' ')
@@ -95,7 +99,7 @@ Resources:
     Properties:
       BucketName: !Sub codepipeline-${AWS::Region}-${AWS::StackName}-container
       Tags:
-        - Key: osl-stackname
+        - Key: !Sub ${CostTagKey}
           Value: !Sub ${CostTagValue}
 
   Pipeline:
@@ -108,7 +112,7 @@ Resources:
       RestartExecutionOnUpdate: False
       RoleArn: !GetAtt ContainerPipelineRole.Arn
       Tags: 
-        - Key: osl-stackname
+        - Key: !Sub ${CostTagKey}
           Value: !Sub ${CostTagValue}
       Stages:
         - Name: !Sub ${AWS::StackName}-Source
@@ -144,7 +148,7 @@ Resources:
                 EnvironmentVariables: !Sub |
                   [
                      {
-                        "value": "${AWS::AccountId}.dkr.ecr.us-east-1.amazonaws.com/${AWS::StackName}",
+                        "value": "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${AWS::StackName}",
                         "name": "DOCKER_REGISTRY",
                         "type": "PLAINTEXT"
                      },
