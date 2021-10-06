@@ -23,7 +23,7 @@ Resources:
   ContainerPipelineRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${AWS::StackName}-container-pipeline-role
+      RoleName: !Sub ${AWS::Region}-${AWS::StackName}-container-pipeline-role
       AssumeRolePolicyDocument:
         Statement:
           Effect: Allow
@@ -36,7 +36,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AdministratorAccess
       Policies:
-        - PolicyName: !Sub ${AWS::StackName}-container-pipeline-policy
+        - PolicyName: !Sub ${AWS::Region}-${AWS::StackName}-container-pipeline-policy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -48,7 +48,7 @@ Resources:
   SARRepository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: !Sub "${AWS::StackName}/sar"
+      RepositoryName: !Sub "${AWS::Region}-${AWS::StackName}/sar"
       Tags:
         - Key: !Sub ${CostTagKey}
           Value: !Sub ${CostTagValue}
