@@ -121,5 +121,4 @@ USER jovyan
 FROM release as testing 
 
 RUN bash /tests/mapready.sh
-RUN bash /tests/finale.sh
 RUN bash /tests/sar.sh
