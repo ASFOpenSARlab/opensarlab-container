@@ -93,11 +93,6 @@ RUN chown -R jovyan:users $HOME/
 RUN addgroup -gid 599 elevation \
     && echo '%elevation ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
-# Add jupyter hooks
-COPY jupyter-hooks /etc/jupyter-hooks
-RUN chmod -R 755 /etc/jupyter-hooks && \
-    chown -R jovyan:users /etc/jupyter-hooks
-
 # Customize home page
 # Customize home page
 RUN mv /opt/conda/lib/python3.9/site-packages/notebook/templates/tree.html /opt/conda/lib/python3.9/site-packages/notebook/templates/original_tree.html
