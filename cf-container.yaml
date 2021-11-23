@@ -48,7 +48,7 @@ Resources:
   SARRepository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: !Sub "${CostTagValue}/sar"
+      RepositoryName: !Sub "${CostTagValue}-container/sar"
       Tags:
         - Key: !Sub ${CostTagKey}
           Value: !Sub ${CostTagValue}
@@ -148,7 +148,7 @@ Resources:
                 EnvironmentVariables: !Sub |
                   [
                      {
-                        "value": "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${CostTagValue}",
+                        "value": "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${CostTagValue}-container",
                         "name": "DOCKER_REGISTRY",
                         "type": "PLAINTEXT"
                      },
