@@ -23,7 +23,7 @@ Resources:
   ContainerPipelineRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${AWS::Region}-${AWS::StackName}-container-pipeline-role
+      RoleName: !Sub ${AWS::Region}-${CostTagValue}-container-pipeline-role
       AssumeRolePolicyDocument:
         Statement:
           Effect: Allow
@@ -36,7 +36,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AdministratorAccess
       Policies:
-        - PolicyName: !Sub ${AWS::Region}-${AWS::StackName}-container-pipeline-policy
+        - PolicyName: !Sub ${AWS::Region}-${CostTagValue}-container-pipeline-policy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -48,7 +48,7 @@ Resources:
   SARRepository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: !Sub "${AWS::StackName}/sar"
+      RepositoryName: !Sub "${CostTagValue}/sar"
       Tags:
         - Key: !Sub ${CostTagKey}
           Value: !Sub ${CostTagValue}
@@ -56,7 +56,7 @@ Resources:
   ProfileContainerCodeBuild:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: !Sub ${AWS::StackName}-profile-containers
+      Name: !Sub ${CostTagValue}-profile-containers
       Artifacts:
         Type: CODEPIPELINE
       Environment:
@@ -97,7 +97,7 @@ Resources:
   PipelineBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub codepipeline-${AWS::Region}-${AWS::StackName}-container
+      BucketName: !Sub codepipeline-${AWS::Region}-${CostTagValue}-container
       Tags:
         - Key: !Sub ${CostTagKey}
           Value: !Sub ${CostTagValue}
@@ -108,14 +108,14 @@ Resources:
       ArtifactStore: 
         Type: S3
         Location: !Ref PipelineBucket
-      Name: !Sub ${AWS::StackName}-Container-Pipeline
+      Name: !Sub ${CostTagValue}-Container-Pipeline
       RestartExecutionOnUpdate: False
       RoleArn: !GetAtt ContainerPipelineRole.Arn
       Tags: 
         - Key: !Sub ${CostTagKey}
           Value: !Sub ${CostTagValue}
       Stages:
-        - Name: !Sub ${AWS::StackName}-Source
+        - Name: !Sub ${CostTagValue}-Source
           Actions:
             - Name: Source
               RunOrder: 1
@@ -134,7 +134,7 @@ Resources:
               Region: !Sub ${AWS::Region}
               Namespace: SourceVariables
 
-        - Name: !Sub ${AWS::StackName}-Build-Profiles
+        - Name: !Sub ${CostTagValue}-Build-Profiles
           Actions:
             - Name: profiles-sar
               RunOrder: 1
@@ -148,7 +148,7 @@ Resources:
                 EnvironmentVariables: !Sub |
                   [
                      {
-                        "value": "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${AWS::StackName}",
+                        "value": "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${CostTagValue}",
                         "name": "DOCKER_REGISTRY",
                         "type": "PLAINTEXT"
                      },
