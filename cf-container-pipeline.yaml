@@ -1,0 +1,180 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+
+  CodeCommitSourceRepo:
+    Type: String
+    Default: ''
+
+  CodeCommitSourceBranch:
+    Type: String
+    Default: ''
+
+  CostTagKey:
+    Type: String
+    Default: ''
+
+  CostTagValue:
+    Type: String
+    Default: ''
+
+Resources:
+
+  ContainerPipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::Region}-${CostTagValue}-container-pipeline-role
+      AssumeRolePolicyDocument:
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: 
+              - cloudformation.amazonaws.com
+              - codebuild.amazonaws.com
+              - codepipeline.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+      Policies:
+        - PolicyName: !Sub ${AWS::Region}-${CostTagValue}-container-pipeline-policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "codecommit:GitPull"
+                Resource: !Sub 'arn:aws:codecommit:*:*:${CodeCommitSourceRepo}'
+
+  PreBuildCodeBuild:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub ${CostTagValue}-profile-containers-prebuild
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        Image: aws/codebuild/standard:5.0
+        ComputeType: BUILD_GENERAL1_SMALL
+        PrivilegedMode: true
+      ServiceRole: !GetAtt ContainerPipelineRole.Arn
+      Tags:
+        - Key: !Sub ${CostTagKey}
+          Value: !Sub ${CostTagValue}
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: |
+          version: 0.2
+
+          phases:
+            install:
+              runtime-versions:
+                python: 3.9
+              commands:
+              - apt update
+              - apt install -y python3-pip
+              - pip3 install jinja2 --upgrade
+            build:
+              commands:
+              - python3 render_cf_container.py 
+                  --output_file $CODEBUILD_SRC_DIR/cf-container-profiles.yaml
+
+  PipelineBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub codepipeline-${AWS::Region}-${CostTagValue}-container
+      Tags:
+        - Key: !Sub ${CostTagKey}
+          Value: !Sub ${CostTagValue}
+
+  Pipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties: 
+      ArtifactStore: 
+        Type: S3
+        Location: !Ref PipelineBucket
+      Name: !Sub ${CostTagValue}-Container-Pipeline
+      RestartExecutionOnUpdate: False
+      RoleArn: !GetAtt ContainerPipelineRole.Arn
+      Tags: 
+        - Key: !Sub ${CostTagKey}
+          Value: !Sub ${CostTagValue}
+      Stages:
+        - Name: !Sub ${CostTagValue}-Source
+          Actions:
+            - Name: Source
+              RunOrder: 1
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Provider: CodeCommit
+                Version: "1"
+              Configuration:
+                BranchName: !Sub ${CodeCommitSourceBranch}
+                OutputArtifactFormat: CODEBUILD_CLONE_REF
+                PollForSourceChanges: "false"
+                RepositoryName: !Sub ${CodeCommitSourceRepo}
+              OutputArtifacts:
+                - Name: SourceArtifact
+              Region: !Sub ${AWS::Region}
+              Namespace: SourceVariables
+
+        - Name: !Sub ${CostTagValue}-PreBuild
+          Actions:
+            - Name: PreBuild
+              RunOrder: 1
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: "1"
+              Configuration:
+                ProjectName: !Ref PreBuildCodeBuild
+              InputArtifacts:
+                - Name: SourceArtifact
+              OutputArtifacts:
+                - Name: PreBuildArtifacts
+              Region: !Sub ${AWS::Region}
+
+        - Name: !Sub ${CostTagValue}-DeployProfiles
+          Actions:
+            - Name: DeployProfiles
+              RunOrder: 1
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: "1"
+              Configuration:
+                ActionMode: CREATE_UPDATE
+                Capabilities: CAPABILITY_NAMED_IAM
+                RoleArn: !GetAtt ContainerPipelineRole.Arn
+                StackName: !Sub ${CostTagValue}-container-profiles
+                TemplatePath: PreBuildArtifact::cf-container-profiles.yaml
+                EnvironmentVariables: !Sub |
+                  [
+                     {
+                        "value": "${CodeCommitSourceRepo}",
+                        "name": "CodeCommitSourceRepo",
+                        "type": "PLAINTEXT"
+                     },
+                     {
+                        "value": "${CodeCommitSourceBranch}",
+                        "name": "CodeCommitSourceBranch",
+                        "type": "PLAINTEXT"
+                     },
+                     {
+                        "value": "${CostTagKey}",
+                        "name": "CostTagKey",
+                        "type": "PLAINTEXT"
+                     },
+                     {
+                        "value": "${CostTagValue}",
+                        "name": "CostTagValue",
+                        "type": "PLAINTEXT"
+                     }
+                  ]
+              InputArtifacts:
+                - Name: PreBuildArtifacts
+              Region: !Sub ${AWS::Region}
+              RoleArn: !GetAtt ContainerPipelineRole.Arn
