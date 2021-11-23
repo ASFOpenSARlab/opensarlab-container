@@ -1,4 +1,3 @@
----
 AWSTemplateFormatVersion: '2010-09-09'
 
 Parameters:
@@ -13,7 +12,7 @@ Parameters:
 
   CostTagKey:
     Type: String
-    Default: ''
+    Default: "osl-billing"
 
   CostTagValue:
     Type: String
@@ -21,10 +20,10 @@ Parameters:
 
 Resources:
 
-  ContainerProfilesRole:
+  ContainerPipelineRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${AWS::Region}-${CostTagValue}-container-profiles-role
+      RoleName: !Sub ${AWS::Region}-${CostTagValue}-container-pipeline-role
       AssumeRolePolicyDocument:
         Statement:
           Effect: Allow
@@ -36,18 +35,23 @@ Resources:
           Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AdministratorAccess
+      Policies:
+        - PolicyName: !Sub ${AWS::Region}-${CostTagValue}-container-pipeline-policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "codecommit:GitPull"
+                Resource: !Sub 'arn:aws:codecommit:*:*:${CodeCommitSourceRepo}'
 
-  {%- for profile in profiles  %}
-
-  Repository{{ profile }}:
+  SARRepository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: !Sub "${CostTagValue}-container/{{ profile }}"
+      RepositoryName: !Sub "${CostTagValue}-container/sar"
       Tags:
         - Key: !Sub ${CostTagKey}
           Value: !Sub ${CostTagValue}
-
-  {% endfor -%}
 
   ProfileContainerCodeBuild:
     Type: AWS::CodeBuild::Project
@@ -57,7 +61,7 @@ Resources:
         Type: CODEPIPELINE
       Environment:
         Type: LINUX_CONTAINER
-        Image: aws/codebuild/standard:5.0
+        Image: aws/codebuild/standard:4.0
         ComputeType: BUILD_GENERAL1_SMALL
         PrivilegedMode: true
       ServiceRole: !GetAtt ContainerPipelineRole.Arn
@@ -71,28 +75,32 @@ Resources:
 
           env:
             git-credential-helper: yes
-            shell: bash
-            secrets-manager:
-              DH_CREDS: "dockerhub/creds"
 
           phases:
             install:
               runtime-versions:
-                python: 3.9
+                python: 3.8
               commands:
               - apt update
               - apt install -y python3-pip
             build:
               commands:
-              - aws ecr get-login-password --region ${AWS::Region}
-                | docker login --username AWS --password-stdin ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com
-                | sed 's|https://||'
-              - echo "Logging into Docker Hub user...";
-                dh_username=$(echo $DH_CREDS | cut -f1 -d' ');
-                echo $DH_CREDS | cut -f2 -d' ' > dh.pass;
-                cat dh.pass | docker login -u $dh_username --password-stdin;
+              - aws ecr get-login-password --region ${AWS::Region} | docker login --username AWS --password-stdin ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com | sed 's|https://||'
+              - echo "Logging into Docker Hub user..."
+              - dh_creds=$(aws secretsmanager get-secret-value --secret-id dockerhub/creds --query 'SecretString' | sed 's/\"//g' )
+              - dh_username=$(echo $dh_creds | cut -f1 -d' ')
+              - echo $dh_creds | cut -f2 -d' ' > dh.pass
+              - cat dh.pass | docker login -u $dh_username --password-stdin
               - cd profiles/$PROFILE_NAME
               - bash build.sh
+
+  PipelineBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub codepipeline-${AWS::Region}-${CostTagValue}-container
+      Tags:
+        - Key: !Sub ${CostTagKey}
+          Value: !Sub ${CostTagValue}
 
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
@@ -100,14 +108,13 @@ Resources:
       ArtifactStore: 
         Type: S3
         Location: !Ref PipelineBucket
-      Name: !Sub ${CostTagValue}-Profiles-Pipeline
+      Name: !Sub ${CostTagValue}-Container-Pipeline
       RestartExecutionOnUpdate: False
       RoleArn: !GetAtt ContainerPipelineRole.Arn
       Tags: 
         - Key: !Sub ${CostTagKey}
           Value: !Sub ${CostTagValue}
       Stages:
-
         - Name: !Sub ${CostTagValue}-Source
           Actions:
             - Name: Source
@@ -127,27 +134,9 @@ Resources:
               Region: !Sub ${AWS::Region}
               Namespace: SourceVariables
 
-        - Name: !Sub ${CostTagValue}-PreBuild
-          Actions:
-            - Name: PreBuild
-              RunOrder: 1
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Provider: CodeBuild
-                Version: "1"
-              Configuration:
-                ProjectName: !Ref PreBuildCodeBuild
-              InputArtifacts:
-                - Name: SourceArtifact
-              OutputArtifacts:
-                - Name: PreBuildArtifacts
-              Region: !Sub ${AWS::Region}
-
         - Name: !Sub ${CostTagValue}-Build-Profiles
           Actions:
-            {%- for profile in profiles  %}
-            - Name: profile-{{ profile }}
+            - Name: profiles-sar
               RunOrder: 1
               ActionTypeId:
                 Category: Build
@@ -164,7 +153,7 @@ Resources:
                         "type": "PLAINTEXT"
                      },
                      {
-                        "value": "{{ profile }}",
+                        "value": "sar",
                         "name": "PROFILE_NAME",
                         "type": "PLAINTEXT"
                      },
@@ -180,8 +169,6 @@ Resources:
                      }
                   ]
               InputArtifacts:
-                - Name: PreBuildArtifacts
+                - Name: SourceArtifact
               OutputArtifacts: []
               Region: !Sub ${AWS::Region}
-            
-            {% endfor -%}
