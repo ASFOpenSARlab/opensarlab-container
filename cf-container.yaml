@@ -53,7 +53,7 @@ Resources:
         Type: CODEPIPELINE
       Environment:
         Type: LINUX_CONTAINER
-        Image: aws/codebuild/standard:4.0
+        Image: aws/codebuild/standard:5.0
         ComputeType: BUILD_GENERAL1_SMALL
         PrivilegedMode: true
       ServiceRole: !GetAtt ContainerPipelineRole.Arn
@@ -74,9 +74,7 @@ Resources:
           phases:
             install:
               runtime-versions:
-                python: 3.8
-              commands:
-              - pip3 install boto3 --upgrade
+                python: 3.9
             build:
               commands:
               - echo "Logging into ECR...";
