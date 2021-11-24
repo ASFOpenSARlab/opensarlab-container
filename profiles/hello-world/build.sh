@@ -1,20 +1,12 @@
 
 set -ex
 
-[ -e download.sh ] && bash download.sh
-
 cp dockerfile dockerfile.build
-
-SED_STR="s|--from=(.*):|--from=$DOCKER_REGISTRY/\1:latest|g"
-sed -i -r $SED_STR dockerfile.build
-
-mkdir -p tests
-cp -r ../../tests/* tests/
 
 BUILD_TAG=$(date +"%F-%H-%M-%S")
 COMMIT_HEAD=$(git rev-parse --short HEAD)
 
-IMAGE_NAME=sar
+IMAGE_NAME=hello-world
 
 time docker build -f dockerfile.build --target testing .
 time docker build -f dockerfile.build \
