@@ -53,7 +53,7 @@ Resources:
         Type: CODEPIPELINE
       Environment:
         Type: LINUX_CONTAINER
-        Image: aws/codebuild/standard:5.0
+        Image: aws/codebuild/standard:4.0
         ComputeType: BUILD_GENERAL1_SMALL
         PrivilegedMode: true
       ServiceRole: !GetAtt ContainerPipelineRole.Arn
@@ -74,15 +74,15 @@ Resources:
           phases:
             install:
               runtime-versions:
-                python: 3.9
+                python: 3.8
               commands:
+              - apt update
               - pip3 install boto3 --upgrade
             build:
               commands:
               - export DOCKER_REGISTRY="${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${CostTagValue}-container"
               - echo "Logging into ECR...";
-                  aws ecr get-login-password --region ${AWS::Region} | 
-                  sudo docker login --username AWS --password-stdin ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com
+                aws ecr get-login-password --region ${AWS::Region} | docker login --username AWS --password-stdin ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com | sed 's|https://||'
               - echo "Logging into Docker Hub user...";
                 dh_username=$(echo $DH_CREDS | cut -f1 -d' ');
                 echo $dh_creds | cut -f2 -d' ' > dh.pass;
