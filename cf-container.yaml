@@ -82,7 +82,7 @@ Resources:
               - echo "Logging into Docker Hub user...";
                 dh_username=$(echo $DH_CREDS | cut -f1 -d' ');
                 echo $dh_creds | cut -f2 -d' ' > dh.pass;
-                cat dh.pass | docker login -u $dh_username --password-stdin;
+                docker login -u $dh_username -p $(cat dh.pass)
               - export DOCKER_REGISTRY="${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${CostTagValue}-container"
               - cd profiles;
                 for p in $(ls -d */ | cut -f1 -d/); do
