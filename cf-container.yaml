@@ -76,17 +76,16 @@ Resources:
               runtime-versions:
                 python: 3.8
               commands:
-              - apt update
               - pip3 install boto3 --upgrade
             build:
               commands:
-              - export DOCKER_REGISTRY="${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${CostTagValue}-container"
               - echo "Logging into ECR...";
-                aws ecr get-login-password --region ${AWS::Region} | docker login --username AWS --password-stdin ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com | sed 's|https://||'
+                docker login -u AWS -p $(aws ecr get-login-password --region ${AWS::Region}) ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com
               - echo "Logging into Docker Hub user...";
                 dh_username=$(echo $DH_CREDS | cut -f1 -d' ');
                 echo $dh_creds | cut -f2 -d' ' > dh.pass;
                 cat dh.pass | docker login -u $dh_username --password-stdin;
+              - export DOCKER_REGISTRY="${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${CostTagValue}-container"
               - cd profiles;
                 for p in $(ls -d */ | cut -f1 -d/); do
                   echo "Building profile '$p'";
