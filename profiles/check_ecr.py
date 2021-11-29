@@ -1,5 +1,6 @@
 
 import argparse
+import sys
 
 import boto3
 
@@ -35,4 +36,8 @@ if __name__ == "__main__":
     parser.add_argument('--container_namespace', default=None)
     args = parser.parse_args()
 
-    main(args.image_name, args.aws_region, args.container_namespace, args.aws_profile)
+    try:
+        main(args.image_name, args.aws_region, args.container_namespace, args.aws_profile)
+    except Exception as e:
+        print(e)
+        sys.exit(1)
