@@ -81,7 +81,7 @@ Resources:
                 docker login -u AWS -p $(aws ecr get-login-password --region ${AWS::Region}) ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com
               - echo "Logging into Docker Hub user...";
                 dh_username=$(echo $DH_CREDS | cut -f1 -d' ');
-                echo $dh_creds | cut -f2 -d' ' > dh.pass;
+                echo $DH_CREDS | cut -f2 -d' ' > dh.pass;
                 docker login -u $dh_username -p $(cat dh.pass)
               - export DOCKER_REGISTRY="${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${CostTagValue}-container"
               - cd profiles;
