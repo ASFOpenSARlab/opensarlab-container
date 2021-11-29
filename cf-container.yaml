@@ -76,6 +76,7 @@ Resources:
               runtime-versions:
                 python: 3.9
             build:
+              on-failure: ABORT
               commands:
               - echo "Logging into ECR...";
                 docker login -u AWS -p $(aws ecr get-login-password --region ${AWS::Region}) ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com
