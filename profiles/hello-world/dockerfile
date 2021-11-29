@@ -1,4 +1,4 @@
-FROM hello-word:latest as release
+FROM hello-world:latest as release
 
 
 ##########################################
