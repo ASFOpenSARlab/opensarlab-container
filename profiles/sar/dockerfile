@@ -93,18 +93,6 @@ RUN chown -R jovyan:users $HOME/
 RUN addgroup -gid 599 elevation \
     && echo '%elevation ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
-# Customize home page
-# Customize home page
-RUN mv /opt/conda/lib/python3.9/site-packages/notebook/templates/tree.html /opt/conda/lib/python3.9/site-packages/notebook/templates/original_tree.html
-COPY jupyter-files/tree.html /opt/conda/lib/python3.9/site-packages/notebook/templates/tree.html
-
-RUN mv /opt/conda/lib/python3.9/site-packages/notebook/templates/page.html /opt/conda/lib/python3.9/site-packages/notebook/templates/original_page.html
-COPY jupyter-files/page.html /opt/conda/lib/python3.9/site-packages/notebook/templates/page.html
-
-
-RUN chmod -R 755 /opt/conda/lib/python3.9/site-packages/notebook/templates/ && \
-  	chown -R jovyan:users /opt/conda/lib/python3.9/site-packages/notebook/templates/
-
 # Clean up a few other things at the end
 RUN apt update && \
     rm -rf /var/lib/apt/lists/* && \
