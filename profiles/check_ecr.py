@@ -39,5 +39,5 @@ if __name__ == "__main__":
     try:
         main(args.image_name, args.aws_region, args.container_namespace, args.aws_profile)
     except Exception as e:
-        print(e)
-        sys.exit(1)
+        print(f"An error occurred: {e}")
+        sys.exit(-1)

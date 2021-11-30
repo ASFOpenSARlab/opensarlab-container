@@ -89,7 +89,6 @@ Resources:
                 for p in $(ls -d */ | cut -f1 -d/); do
                   echo "Building profile '$p'";
                   python3 check_ecr.py --image_name $p --aws_region ${AWS::Region} --container_namespace ${CostTagValue}-container;
-                  EXITCODE=$?; if [ $EXITCODE -ne 0 ]; then exit($EXITCODE); fi;
                   cd $p;
                   bash build.sh;
                   cd ..;
