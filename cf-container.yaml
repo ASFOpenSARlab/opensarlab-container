@@ -90,7 +90,7 @@ Resources:
                   echo "Building profile '$p'";
                   python3 check_ecr.py --image_name $p --aws_region ${AWS::Region} --container_namespace ${CostTagValue}-container;
                   cd $p;
-                  bash build.sh;
+                  bash build.sh $p;
                   cd ..;
                 done
 

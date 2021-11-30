@@ -6,7 +6,7 @@ cp dockerfile dockerfile.build
 BUILD_TAG=$(date +"%F-%H-%M-%S")
 COMMIT_HEAD=$(git rev-parse --short HEAD)
 
-IMAGE_NAME=hello-world
+IMAGE_NAME=$1
 
 time docker build -f dockerfile.build --target testing .
 time docker build -f dockerfile.build \
