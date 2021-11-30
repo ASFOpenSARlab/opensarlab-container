@@ -11,9 +11,9 @@ def main(image_name, aws_region, container_namespace, aws_profile):
 
     session = None 
     try:
-        session = boto3.session.Session(region_name=aws_region, profile_name=aws_profile)
+        session = boto3.Session(region_name=aws_region, profile_name=aws_profile)
     except:
-        session = boto3.session.Session(region_name=aws_region)
+        session = boto3.Session(region_name=aws_region)
 
     ecr = session.client('ecr')
 
@@ -22,7 +22,7 @@ def main(image_name, aws_region, container_namespace, aws_profile):
     try:
         response = ecr.describe_repositories(repositoryNames=[repositoryName])
         print(f"Repo '{repositoryName}' already exists.")
-    except ecr.exception.RepositoryNotFoundException as e:
+    except ecr.exceptions.RepositoryNotFoundException as e:
         print(f"Repo for {repositoryName} not found. Creating...")
         response = ecr.create_repository(repositoryName=repositoryName)
 
