@@ -11,10 +11,11 @@ sed -i -r $SED_STR dockerfile.build
 mkdir -p tests
 cp -r ../../tests/* tests/
 
+
 BUILD_TAG=$(date +"%F-%H-%M-%S")
 COMMIT_HEAD=$(git rev-parse --short HEAD)
 
-IMAGE_NAME=sar
+IMAGE_NAME=$1
 
 time docker build -f dockerfile.build --target testing .
 time docker build -f dockerfile.build \
