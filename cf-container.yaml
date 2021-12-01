@@ -45,10 +45,10 @@ Resources:
                   - "codecommit:GitPull"
                 Resource: !Sub 'arn:aws:codecommit:*:*:${CodeCommitSourceRepo}'
 
-  ProfileContainerCodeBuild:
+  ImagesCodeBuild:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: !Sub ${CostTagValue}-profile-containers
+      Name: !Sub ${CostTagValue}-images
       Artifacts:
         Type: CODEPIPELINE
       Environment:
@@ -85,9 +85,9 @@ Resources:
                 echo $DH_CREDS | cut -f2 -d' ' > dh.pass;
                 docker login -u $dh_username -p $(cat dh.pass)
               - export DOCKER_REGISTRY="${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${CostTagValue}-container"
-              - cd profiles;
+              - cd images;
                 for p in $(ls -d */ | cut -f1 -d/); do
-                  echo "Building profile '$p'";
+                  echo "Building image '$p'";
                   python3 check_ecr.py --image_name $p --aws_region ${AWS::Region} --container_namespace ${CostTagValue}-container;
                   cd $p;
                   bash build.sh $p;
@@ -134,9 +134,9 @@ Resources:
               Region: !Sub ${AWS::Region}
               Namespace: SourceVariables
 
-        - Name: !Sub ${CostTagValue}-Build-Profiles
+        - Name: !Sub ${CostTagValue}-Build-Images
           Actions:
-            - Name: profiles
+            - Name: images
               RunOrder: 1
               ActionTypeId:
                 Category: Build
@@ -144,7 +144,7 @@ Resources:
                 Provider: CodeBuild
                 Version: "1"
               Configuration:
-                ProjectName: !Ref ProfileContainerCodeBuild
+                ProjectName: !Ref ImagesCodeBuild
               InputArtifacts:
                 - Name: SourceArtifact
               OutputArtifacts: []
