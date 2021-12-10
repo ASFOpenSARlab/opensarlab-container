@@ -89,6 +89,9 @@ RUN pip install -U jupyterlab
 # Make sure that any files in the home directory are jovyan permission
 RUN chown -R jovyan:users $HOME/
 
+# Make sure mamba (within conda) has write access
+RUN chmod -R 755 /opt/conda/pkgs
+
 # Add sudo group user 599 elevation
 RUN addgroup -gid 599 elevation \
     && echo '%elevation ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
