@@ -50,7 +50,8 @@ RUN apt update && \
         openssh-client \
         libgl1-mesa-glx \
         emacs \
-        gnupg2
+        gnupg2 \
+        jq
 
 RUN conda install -c conda-forge awscli boto3 pyyaml bokeh
 
