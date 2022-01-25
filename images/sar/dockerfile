@@ -53,7 +53,7 @@ RUN apt update && \
         gnupg2 \
         jq
 
-RUN conda install -c conda-forge awscli boto3 pyyaml bokeh
+RUN conda install -c conda-forge awscli boto3 pyyaml bokeh mamba_gator
 
 # Install jupyter libaries
 RUN conda install -c conda-forge jupyter_contrib_nbextensions jupyter-resource-usage nb_conda_kernels jupyterlab-spellchecker ipympl kernda
@@ -84,9 +84,11 @@ RUN apt update && \
 RUN conda run -n base kernda --display-name base -o /opt/conda/share/jupyter/kernels/python3/kernel.json
 
 # Set the default theme to opensarlab-theme-light to avoid issues with built-in light theme and status bar
+# Remove the logout option from the main menu to steer users to the hub control panel
 RUN SETTINGS=/opt/conda/share/jupyter/lab/settings && \
     mkdir -p $SETTINGS && \
-    echo '{"@jupyterlab/apputils-extension:themes": {"theme": "opensarlab-theme-light"}}' > $SETTINGS/overrides.json
+    echo '{"@jupyterlab/apputils-extension:themes": {"theme": "opensarlab-theme-light"}}' > $SETTINGS/overrides.json && \
+    echo ',{"@jupyterlab/mainmenu-extension:plugin": {"menus": [{"id": "jp-mainmenu-file", "items": [{"command": "hub:logout", "disabled": true}]}]}}'>> $SETTINGS/overrides.json
 
 RUN rm -rf /home/jovyan/..?* /home/jovyan/.[!.]* /home/jovyan/*
 WORKDIR /home/jovyan
