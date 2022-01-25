@@ -62,7 +62,7 @@ RUN conda install -c conda-forge jupyter_contrib_nbextensions jupyter-resource-u
 RUN conda install -c conda-forge dask-gateway dask distributed -y
 
 # Install OpenSARlab's widgets and extensions
-RUN python -m pip install url-widget opensarlab-profile-label opensarlab-doc-link opensarlab-notifications==0.1.3 opensarlab-theme-light
+RUN python -m pip install url-widget opensarlab-profile-label opensarlab-doc-link opensarlab-notifications==0.1.4 opensarlab-theme-light
 
 # Make sure that any files in the home directory are jovyan permission
 RUN chown -R jovyan:users $HOME/
