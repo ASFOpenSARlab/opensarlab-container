@@ -56,7 +56,7 @@ RUN apt update && \
 RUN conda install -c conda-forge awscli boto3 pyyaml bokeh
 
 # Install jupyter libaries
-RUN conda install -c conda-forge jupyter_contrib_nbextensions jupyter-resource-usage nb_conda_kernels jupyterlab-spellchecker ipympl
+RUN conda install -c conda-forge jupyter_contrib_nbextensions jupyter-resource-usage nb_conda_kernels jupyterlab-spellchecker ipympl kernda
 
 #install dask libraries
 RUN conda install -c conda-forge dask-gateway dask distributed -y
@@ -79,6 +79,14 @@ RUN apt update && \
     rm -rf /var/lib/apt/lists/* && \
     apt autoremove -y && \
     conda clean --yes --all
+
+# Use the kernel display name `base` for the base conda environment
+RUN conda run -n base kernda --display-name base -o /opt/conda/share/jupyter/kernels/python3/kernel.json
+
+# Set the default theme to opensarlab-theme-light to avoid issues with built-in light theme and status bar
+RUN SETTINGS=/opt/conda/share/jupyter/lab/settings && \
+    mkdir -p $SETTINGS && \
+    echo '{"@jupyterlab/apputils-extension:themes": {"theme": "opensarlab-theme-light"}}' > $SETTINGS/overrides.json
 
 RUN rm -rf /home/jovyan/..?* /home/jovyan/.[!.]* /home/jovyan/*
 WORKDIR /home/jovyan
