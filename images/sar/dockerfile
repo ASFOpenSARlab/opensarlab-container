@@ -4,6 +4,8 @@ FROM jupyter/base-notebook:hub-1.4.2 as release
 USER root
 WORKDIR /
 
+RUN set -ve
+
 RUN apt update && \
     apt install --no-install-recommends -y \
         software-properties-common \
@@ -24,9 +26,6 @@ RUN apt install --no-install-recommends -y \
 
 COPY TRAIN/ /usr/local/TRAIN/
 
-# MAPREADY ****************************************************************
-RUN set -e 
-
 RUN apt install -y \
     proj-bin \
     geotiff-bin \
@@ -36,29 +35,6 @@ RUN apt install -y \
     libnetcdf-dev \
     libgdal-dev \
     libgsl-dev
-
-RUN cp /usr/lib/x86_64-linux-gnu/libgeotiff.so.5 /usr/lib/x86_64-linux-gnu/libgeotiff.so.2 && \
-    cp /usr/lib/libgdal.so /usr/lib/libgdal.so.20 && \
-    cp /usr/lib/x86_64-linux-gnu/libproj.so.19 /usr/lib/x86_64-linux-gnu/libproj.so.12 && \
-    cp /usr/lib/x86_64-linux-gnu/libhdf5_serial.so.103 /usr/lib/x86_64-linux-gnu/libhdf5_serial.so.100 && \
-    cp /usr/lib/x86_64-linux-gnu/libnetcdf.so.15 /usr/lib/x86_64-linux-gnu/libnetcdf.so.13
-
-ENV MAPREADY_HOME /usr/local/mapready/
-
-COPY mapready-build/bin/* $MAPREADY_HOME/bin/
-COPY mapready-build/doc/* $MAPREADY_HOME/doc/
-COPY mapready-build/lib/* $MAPREADY_HOME/lib/
-COPY mapready-build/man/* $MAPREADY_HOME/man/
-COPY mapready-build/share/* $MAPREADY_HOME/share/
-
-ENV PATH $PATH:$MAPREADY_HOME/bin/:$MAPREADY_HOME/lib/:$MAPREADY_HOME/share/
-
-# Manually update nbconvert. A dicrepancy in the versioning causes a 500 when opening a notebook. https://github.com/jupyter/notebook/issues/3629#issuecomment-399408222
-# Remember, here pip is updating within the condas namespace where jupyter notebook items are held.
-RUN pip install --upgrade nbconvert
-
-# Downgrade tornado otherwise the notebook can't connect to the notebook server. https://github.com/jupyter/notebook/issues/2664#issuecomment-468954423
-RUN pip install tornado==5.1.1  # 4.5.3
 
 # Install general items. If a library is needed for a specific piece of software, put it with that software.
 RUN apt update && \
@@ -74,23 +50,26 @@ RUN apt update && \
         openssh-client \
         libgl1-mesa-glx \
         emacs \
-        gnupg2
+        gnupg2 \
+        jq \
+        gfortran
 
-RUN pip install 'awscli==1.19.60' 'boto3==1.17.60' 'pyyaml==5.4.1' 'bokeh==2.3.1'
+# Update conda and mamba: this breaks things in the hook, need to play with it more
+RUN conda update -n base conda mamba
 
-# Install any other custom and jupyter libaries like widgets
-# Use pip (conda version) since we want to corner off GIAnT's work and also run it with Jupyter
-RUN pip install asf-hyp3==3.0.3
-RUN conda install -c conda-forge jupyter_contrib_nbextensions=0.5.1 jupyter-resource-usage nb_conda_kernels -y
+RUN conda install -c conda-forge awscli boto3 pyyaml bokeh mamba_gator
 
-# Update jupyter lab manually to get the lastest version
-RUN pip install -U jupyterlab
+# Install jupyter libaries
+RUN conda install -c conda-forge jupyter_contrib_nbextensions jupyter-resource-usage nb_conda_kernels jupyterlab-spellchecker ipympl kernda
+
+#install dask libraries
+RUN conda install -c conda-forge dask-gateway dask distributed -y
+
+# Install OpenSARlab's widgets and extensions
+RUN python -m pip install url-widget opensarlab-profile-label opensarlab-doc-link opensarlab_controlbtn opensarlab-notifications==0.1.4 opensarlab-theme-light
 
 # Make sure that any files in the home directory are jovyan permission
 RUN chown -R jovyan:users $HOME/
-
-# Make sure mamba (within conda) has write access
-RUN chmod -R 755 /opt/conda/pkgs
 
 # Add sudo group user 599 elevation
 RUN addgroup -gid 599 elevation \
@@ -102,6 +81,25 @@ RUN apt update && \
     apt autoremove -y && \
     conda clean --yes --all
 
+# Make sure mamba (within conda) has write access
+RUN chmod -R 777 /opt/conda/pkgs/
+
+# Use the kernel display name `base` for the base conda environment
+RUN conda run -n base kernda --display-name base -o /opt/conda/share/jupyter/kernels/python3/kernel.json
+
+# Set the default theme to opensarlab-theme-light to avoid issues with built-in light theme and status bar
+# Remove the logout option from the main menu to steer users to the hub control panel
+# Remove the launch classic notebook option to avoid broken classic terminals and image loading errors
+RUN SETTINGS=/opt/conda/share/jupyter/lab/settings && \
+    mkdir -p $SETTINGS && \
+    OVERRIDES=$SETTINGS/overrides.json && \
+    TEMP=$SETTINGS/temp && \
+    echo '{"@jupyterlab/apputils-extension:themes": {"theme": "opensarlab-theme-light"}}' > $OVERRIDES && \
+    jq '. += {"@jupyterlab/mainmenu-extension:plugin": {"menus": [{"id": "jp-mainmenu-file", "items": [{"command": "hub:logout", "disabled": true}]}]}}' $OVERRIDES > $TEMP && \
+    jq '.["@jupyterlab/mainmenu-extension:plugin"].menus[1] |= {"id": "jp-mainmenu-help", "items": [{"command": "help:launch-classic-notebook", "disabled": true}]}' $TEMP > $OVERRIDES && \
+    jq '. += {"jupyterlab-topbar-extension:plugin": {"order": ["spacer", "opensarlab_profile_label", "doc_link", "server-btn"]}}' $OVERRIDES > $TEMP && \
+    mv $TEMP $OVERRIDES
+
 RUN rm -rf /home/jovyan/..?* /home/jovyan/.[!.]* /home/jovyan/*
 WORKDIR /home/jovyan
 RUN conda init
@@ -111,5 +109,4 @@ USER jovyan
 
 FROM release as testing 
 
-RUN bash /tests/mapready.sh
 RUN bash /tests/sar.sh
