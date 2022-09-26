@@ -10,6 +10,7 @@ RUN apt update && \
     apt install --no-install-recommends -y \
         software-properties-common \
         git && \
+    apt-get install -y gpg-agent && \
     add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable && \
     apt update && \
     apt upgrade -y
