@@ -1,0 +1,93 @@
+diff --git a/jupyter_remote_desktop_proxy/__init__.py b/jupyter_remote_desktop_proxy/__init__.py
+index b3f7714..8a742c6 100644
+--- a/jupyter_remote_desktop_proxy/__init__.py
++++ b/jupyter_remote_desktop_proxy/__init__.py
+@@ -36,7 +36,7 @@ def setup_desktop():
+                 '-xstartup',
+                 os.path.join(HERE, 'share/xstartup'),
+                 '-geometry',
+-                '1680x1050',
++                '2000x1200',
+                 '-SecurityTypes',
+                 'None',
+                 '-fg',
+diff --git a/jupyter_remote_desktop_proxy/share/web/noVNC-1.2.0/vnc_lite.html b/jupyter_remote_desktop_proxy/share/web/noVNC-1.2.0/vnc_lite.html
+index 14a0313..c240a34 100644
+--- a/jupyter_remote_desktop_proxy/share/web/noVNC-1.2.0/vnc_lite.html
++++ b/jupyter_remote_desktop_proxy/share/web/noVNC-1.2.0/vnc_lite.html
+@@ -47,7 +47,15 @@
+         #status {
+             text-align: center;
+         }
+-        #sendCtrlAltDelButton {
++        #jupyterLabPageButton {
++            position: fixed;
++            top: 0px;
++            right: 150px;
++            border: 1px outset;
++            padding: 5px 5px 4px 5px;
++            cursor: pointer;
++        }
++        #serverStartStopPageButton {
+             position: fixed;
+             top: 0px;
+             right: 0px;
+@@ -135,14 +143,33 @@
+             desktopName = e.detail.name;
+         }
+ 
+-        // Since most operating systems will catch Ctrl+Alt+Del
+-        // before they get a chance to be intercepted by the browser,
+-        // we provide a way to emulate this key sequence.
+-        function sendCtrlAltDel() {
+-            rfb.sendCtrlAltDel();
++        // Go to JupyterHub's home page
++        // If this does nto exist, it will give a 404
++        function jupyterLabPage() {
++            const lab_path = window.location.href.replace('desktop', 'lab')
++            window.location.replace(lab_path);
+             return false;
+         }
+ 
++        document.getElementById('jupyterLabPageButton')
++            .onclick = jupyterLabPage;
++
++        // Go to server start/stop
++        function serverStartStopPage() {
++            const url = window.location.href
++            const regex = /\/lab\/(.*)\/user/
++            const found = url.match(regex);
++
++            const lab_name = found[1]
++            if (lab_name) {
++                    window.location.href = "/lab/" + lab_name + "/hub/home";
++                }
++            return false;
++        }
++
++        document.getElementById('serverStartStopPageButton')
++            .onclick = serverStartStopPage;
++
+         // Show a status text in the top bar
+         function status(text) {
+             document.getElementById('status').textContent = text;
+@@ -168,9 +195,6 @@
+             return defaultValue;
+         }
+ 
+-        document.getElementById('sendCtrlAltDelButton')
+-            .onclick = sendCtrlAltDel;
+-
+         // Read parameters specified in the URL query string
+         // By default, use the host and port of server that served this file
+         const host = readQueryVariable('host', window.location.hostname);
+@@ -249,7 +273,8 @@
+             </div>
+         </div>
+ 
+-        <div id="sendCtrlAltDelButton">Send CtrlAltDel</div>
++        <div id="jupyterLabPageButton">Go to JupyterLab</div>
++        <div id="serverStartStopPageButton">Stop Server and Logout</div>
+     </div>
+     <div id="screen">
+         <!-- This is where the remote screen will appear -->
