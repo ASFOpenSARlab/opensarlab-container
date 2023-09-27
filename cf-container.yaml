@@ -47,9 +47,8 @@ Resources:
   GitHubPATSecretsManager:
     Type: AWS::SecretsManager::Secret
     Properties: 
-      Description: Personal Access Token from GitHub for Container repo 
+      Description: Personal Access Token from GitHub for Container repo. Default is empty. 
       Name: !Sub github/${AWS::Region}-${CostTagValue}-container-PAT
-      SecretString: ''
 
   ImagesCodeBuild:
     Type: AWS::CodeBuild::Project
