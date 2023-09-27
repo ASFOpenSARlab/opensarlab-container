@@ -2,14 +2,6 @@ AWSTemplateFormatVersion: '2010-09-09'
 
 Parameters:
 
-  CodeCommitSourceRepo:
-    Type: String
-    Default: ''
-
-  CodeCommitSourceBranch:
-    Type: String
-    Default: ''
-
   ContainerNamespace:
     Type: String
     Default: ''
