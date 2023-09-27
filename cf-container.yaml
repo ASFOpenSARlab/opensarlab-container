@@ -133,12 +133,11 @@ Resources:
                 - Name: SourceArtifact
               RunOrder: 1
               Configuration:
-                Owner: ${GitHubOrgName}
-                Repo: ${GitHubRepoName}
+                Owner: !Sub ${GitHubOrgName}
+                Repo: !Sub ${GitHubRepoName}
                 PollForSourceChanges: 'false'
-                Branch: ${GitHubBranchName}
+                Branch: !Sub ${GitHubBranchName}
                 OAuthToken: !Sub '{{resolve:secretsmanager:github/${AWS::Region}-${CostTagValue}-container-PAT:SecretString}}'
-              Name: ApplicationSource
 
         - Name: !Sub ${CostTagValue}-Build-Images
           Actions:
