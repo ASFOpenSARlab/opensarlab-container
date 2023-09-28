@@ -14,13 +14,15 @@ Parameters:
     Type: String
     Default: ''
 
-  GitHubOrgName:
+  CodeStarConnectionArn:
     Type: String
-    Default: 'ASFOpenSARlab'
+    Description: The Arn goes here. Connection created via https://docs.aws.amazon.com/dtconsole/latest/userguide/connections-create-github.html
+    Default: ''
 
-  GitHubRepoName:
+  GitHubFullRepo:
     Type: String
-    Default: 'opensarlab-container'
+    Description: Owner/RepoName of desired GitHub path https://github.com/Owner/RepoName. 
+    Default: 'ASFOpenSARlab/opensarlab-container'
 
   GitHubBranchName:
     Type: String
@@ -50,12 +52,6 @@ Resources:
       Description: DockerHub creds. Must be a string with format "username password".  
       Name: !Sub dockerhub/${AWS::Region}-${CostTagValue}-creds
       SecretString: "ReplaceMeOrYouWillAlwaysFail"
-
-  GitHubPATSecretsManager:
-    Type: AWS::SecretsManager::Secret
-    Properties: 
-      Description: Personal Access Token from GitHub for Container repo. Default is empty. 
-      Name: !Sub github/${AWS::Region}-${CostTagValue}-container-PAT
 
   ImagesCodeBuild:
     Type: AWS::CodeBuild::Project
@@ -92,8 +88,8 @@ Resources:
               commands:
               - echo "Checking for the existance of DockerHub creds...";
                 if [ -z "$DH_CREDS" ]; then
-                  echo "Docker Hub cred secret not present.. Exiting.";
-                  exit 1
+                  echo "Docker Hub cred secret not present... Exiting.";
+                  exit 1;
                 fi
               - echo "Logging into ECR...";
                 docker login -u AWS -p $(aws ecr get-login-password --region ${AWS::Region}) ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com
@@ -138,18 +134,17 @@ Resources:
               InputArtifacts: []
               ActionTypeId:
                 Version: '1'
-                Owner: ThirdParty
+                Owner: AWS
                 Category: Source
-                Provider: GitHub
+                Provider: CodeStarSourceConnection
               OutputArtifacts:
                 - Name: SourceArtifact
               RunOrder: 1
               Configuration:
-                Owner: !Sub ${GitHubOrgName}
-                Repo: !Sub ${GitHubRepoName}
-                PollForSourceChanges: 'false'
-                Branch: !Sub ${GitHubBranchName}
-                OAuthToken: !Sub '{{resolve:secretsmanager:github/${AWS::Region}-${CostTagValue}-container-PAT:SecretString}}'
+                ConnectionArn: !Sub ${CodeStarConnectionArn}
+                FullRepositoryId: !Sub ${GitHubFullRepo}
+                BranchName: !Sub ${GitHubBranchName}
+                OutputArtifactFormat: CODEBUILD_CLONE_REF
 
         - Name: !Sub ${CostTagValue}-Build-Images
           Actions:
