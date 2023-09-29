@@ -46,13 +46,6 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AdministratorAccess
 
-  DockerHubCredsSecretsManager:
-    Type: AWS::SecretsManager::Secret
-    Properties: 
-      Description: DockerHub creds. Must be a string with format "username password".  
-      Name: !Sub dockerhub/${AWS::Region}-${CostTagValue}-creds
-      SecretString: "ReplaceMeOrYouWillAlwaysFail"
-
   ImagesCodeBuild:
     Type: AWS::CodeBuild::Project
     Properties:
@@ -76,8 +69,6 @@ Resources:
           env:
             git-credential-helper: yes
             shell: bash
-            secrets-manager:
-              DH_CREDS: "dockerhub/${AWS::Region}-${CostTagValue}-creds"
 
           phases:
             install:
@@ -86,17 +77,8 @@ Resources:
             build:
               on-failure: ABORT
               commands:
-              - echo "Checking for the existance of DockerHub creds...";
-                if [ -z "$DH_CREDS" ]; then
-                  echo "Docker Hub cred secret not present... Exiting.";
-                  exit 1;
-                fi
               - echo "Logging into ECR...";
                 docker login -u AWS -p $(aws ecr get-login-password --region ${AWS::Region}) ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com
-              - echo "Logging into Docker Hub user...";
-                dh_username=$(echo $DH_CREDS | cut -f1 -d' ');
-                echo $DH_CREDS | cut -f2 -d' ' > dh.pass;
-                docker login -u $dh_username -p $(cat dh.pass)
               - export DOCKER_REGISTRY="${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ContainerNamespace}"
               - cd images;
                 for p in $(ls -d */ | cut -f1 -d/); do
