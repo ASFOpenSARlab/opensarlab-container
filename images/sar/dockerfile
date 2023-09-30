@@ -113,31 +113,32 @@ RUN mkdir -p /tmp/build && \
 ENV PATH=/usr/local/GMTSAR/bin:$PATH
 ##################################### END PyGMTSAR #####################################
 
-# Jupyter Desktop ####################
-RUN apt update && \
-    apt install -y \
+# Jupyter Desktop ######################################################################
+#
+# When running a local version of this dockerfile, consult https://github.com/jupyterhub/jupyter-remote-desktop-proxy/issues/47#issuecomment-1687484891
+#
+RUN apt-get -y -q update \
+    && apt-get -y -q install \
+        flatpak \
+        patch \
         dbus-x11 \
-        xorg \
         xfce4 \
-        firefox \
-        patch
+        xfce4-panel \
+        xfce4-session \
+        xfce4-settings \
+        xorg \
+        xubuntu-icon-theme \
+        tigervnc-standalone-server \
+        tigervnc-xorg-extension && \
+    mamba install --yes websockify && \
+    git clone https://github.com/jupyterhub/jupyter-remote-desktop-proxy.git /opt/install && \
+    cd /opt/install && \
+    mamba env update -n base --file environment.yml
 
-ARG TURBOVNC_VERSION=3.0
-RUN wget -q "https://sourceforge.net/projects/turbovnc/files/${TURBOVNC_VERSION}/turbovnc_${TURBOVNC_VERSION}_amd64.deb/download" -O turbovnc_${TURBOVNC_VERSION}_amd64.deb && \
-    apt-get install -y -q ./turbovnc_${TURBOVNC_VERSION}_amd64.deb && \
-    apt-get remove -y -q light-locker && \
-    rm ./turbovnc_${TURBOVNC_VERSION}_amd64.deb && \
-    ln -s /opt/TurboVNC/bin/* /usr/local/bin/
-
-RUN git clone https://github.com/jupyterhub/jupyter-remote-desktop-proxy.git /opt/install
 
 COPY pkgs/vnc_patches/vnc.patch /opt/install/vnc.patch
 RUN cd /opt/install && \
     patch -p1 < vnc.patch
-
-RUN fix-permissions /opt/install && \
-    cd /opt/install && \
-    mamba env update -n base --file environment.yml
 
 #### END Jupyter Desktop
 
