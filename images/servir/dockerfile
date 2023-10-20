@@ -60,7 +60,7 @@ RUN apt update && \
 RUN apt install texlive-xetex texlive-fonts-recommended texlive-plain-generic -y
 
 # Update conda and mamba: this breaks things in the hook, need to play with it more
-RUN mamba update -n base -y conda mamba pip
+RUN mamba update -c conda-forge -y conda mamba pip
 
 RUN mamba install -c conda-forge -y awscli boto3 pyyaml bokeh plotly 'pyopenssl>=23.0.0'
 
