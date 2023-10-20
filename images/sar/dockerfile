@@ -61,7 +61,7 @@ RUN apt install texlive-xetex texlive-fonts-recommended texlive-plain-generic -y
 
 # Update conda and mamba: this breaks things in the hook, need to play with it more
 # Updating just conda and mamba will auto-remove pip, so force pip to update to remain
-RUN mamba update -n base -y conda mamba pip
+RUN mamba update -c conda-forge -y conda mamba pip
 
 RUN mamba install -c conda-forge -y \
     ### Install plotting and general
