@@ -71,7 +71,7 @@ RUN mamba install -c conda-forge -y jupyter_contrib_nbextensions jupyter-resourc
 RUN mamba install -c conda-forge -y dask-gateway dask distributed
 
 # Install OpenSARlab's widgets and extensions
-RUN python -m pip install url-widget opensarlab-frontend==0.1.0
+RUN python -m pip install url-widget opensarlab-frontend==1.4.2
 
 # Make sure that any files in the home directory are jovyan permission
 RUN chown -R jovyan:users $HOME/
@@ -100,7 +100,7 @@ RUN SETTINGS=/opt/conda/share/jupyter/lab/settings && \
     TEMP=$SETTINGS/temp && \
     jq '. += {"@jupyterlab/mainmenu-extension:plugin": {"menus": [{"id": "jp-mainmenu-file", "items": [{"command": "hub:logout", "disabled": true}]}]}}' $OVERRIDES > $TEMP && \
     jq '.["@jupyterlab/mainmenu-extension:plugin"].menus[1] |= {"id": "jp-mainmenu-help", "items": [{"command": "help:launch-classic-notebook", "disabled": true}]}' $TEMP > $OVERRIDES && \
-    #jq '. += {"jupyterlab-topbar-extension:plugin": {"order": ["spacer", "opensarlab_profile_label", "doc_link", "server-btn"]}}' $OVERRIDES > $TEMP && \
+    jq '. += {"opensarlab_frontend:plugin": {"controlbtn": {"enabled": true, "rank": 1110}, "doc_link": {"enabled": true, "rank": 1100}, "gifcap_btn": {"enabled": true, "rank": 1025},"oslnotify": {"enabled": true, "note_type": "storage,calendar"}, "profile_label": {"enabled": true, "rank": 1050}}}' $OVERRIDES > $TEMP && \
     mv $TEMP $OVERRIDES
 
 RUN rm -rf /home/jovyan/..?* /home/jovyan/.[!.]* /home/jovyan/*
