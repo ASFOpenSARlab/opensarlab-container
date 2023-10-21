@@ -5,3 +5,5 @@
 !download.sh
 !pkgs
 !pkgs/**
+!configs
+!configs/**

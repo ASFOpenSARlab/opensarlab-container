@@ -6,8 +6,13 @@ WORKDIR /
 
 RUN set -ve
 
-RUN apt update && \
-    apt install --no-install-recommends -y \
+COPY pkgs/vnc_patches/vnc.patch /tmp/vnc.patch
+COPY tests/* /tests/
+COPY TRAIN/ /usr/local/TRAIN/
+COPY ./configs/opt/conda/share/jupyter/lab/settings/overrides.json /opt/conda/share/jupyter/lab/settings/overrides.json
+
+RUN apt update
+RUN apt install --no-install-recommends -y \
         software-properties-common \
         git && \
     apt-get install -y gpg-agent && \
@@ -15,19 +20,26 @@ RUN apt update && \
     apt update && \
     apt upgrade -y
 
-COPY tests/* /tests/
-
-# SNAP  ****************************************************************
-RUN apt install --no-install-recommends -y \
-    default-jdk-headless
-
-# TRAIN  ****************************************************************
-RUN apt install --no-install-recommends -y \
-    gdal-bin
-
-COPY TRAIN/ /usr/local/TRAIN/
-
-RUN apt install -y \
+RUN apt install --no-install-recommends --fix-missing -y \
+    ### GENERAL
+    zip \
+    unzip \
+    wget \
+    vim \
+    rsync \
+    less \
+    snaphu \
+    curl \
+    openssh-client \
+    libgl1-mesa-glx \
+    emacs \
+    gnupg2 \
+    jq \
+    gfortran \
+    ### SNAP
+    default-jdk-headless \
+    ### TRAIN 
+    gdal-bin \
     proj-bin \
     geotiff-bin \
     libshp-dev \
@@ -35,29 +47,33 @@ RUN apt install -y \
     libhdf5-dev \
     libnetcdf-dev \
     libgdal-dev \
-    libgsl-dev
-
-# Install general items. If a library is needed for a specific piece of software, put it with that software.
-RUN apt update && \
-    apt install --fix-missing --no-install-recommends -y \
-        zip \
-        unzip \
-        wget \
-        vim \
-        rsync \
-        less \
-        snaphu \
-        curl \
-        openssh-client \
-        libgl1-mesa-glx \
-        emacs \
-        gnupg2 \
-        jq \
-        gfortran
-
-
-# Install texlive for PDF exporting of notebooks containing LaTex
-RUN apt install texlive-xetex texlive-fonts-recommended texlive-plain-generic -y
+    libgsl-dev \
+    ### Install texlive for PDF exporting of notebooks containing LaTex
+    texlive-xetex \
+    texlive-fonts-recommended \
+    texlive-plain-generic \
+    ### PyGMTSAR
+    csh \
+    autoconf \
+    make \ 
+    libtiff5-dev \ 
+    liblapack-dev \
+    libgmt-dev \
+    gmt-dcw \
+    gmt-gshhg \
+    gmt \
+    ### Jupyter Desktop
+    #flatpak \
+    patch \
+    dbus-x11 \
+    xfce4 \
+    xfce4-panel \
+    xfce4-session \
+    xfce4-settings \
+    xorg \
+    xubuntu-icon-theme \
+    tigervnc-standalone-server \
+    tigervnc-xorg-extension
 
 # Update conda and mamba: this breaks things in the hook, need to play with it more
 # Updating just conda and mamba will auto-remove pip, so force pip to update to remain
@@ -80,106 +96,58 @@ RUN mamba install -c conda-forge -y \
     ipympl \
     jupyterlab_widgets \
     ipywidgets \
-    ### Install dask libraries
+    ### Dask
     dask-gateway \
     dask \
     distributed \
+    ### Jupyter DEsktop
+    websockify \
     --
 
-####################################### PyGMTSAR #######################################
-RUN apt install -y --no-install-recommends \
-        csh \
-        autoconf \
-        make \ 
-        libtiff5-dev \ 
-        liblapack-dev \
-        libgmt-dev \
-        gmt-dcw \
-        gmt-gshhg \
-        gmt && \
-    python3 -m pip install pygmtsar
+RUN python3 -m pip install \
+        ### For ASF
+        url-widget \
+        opensarlab-frontend==1.4.2 \
+        ### For pyGMTSAR
+        pygmtsar &&\
+    cd / &&\
+        mkdir -p /tmp/build/GMTSAR /usr/local/GMTSAR &&\
+        git clone --branch master https://github.com/gmtsar/gmtsar /tmp/build/GMTSAR/ &&\
+        cd /tmp/build/GMTSAR &&\
+        autoconf &&\
+        ./configure --with-orbits-dir=/tmp CFLAGS='-z muldefs' LDFLAGS='-z muldefs' &&\
+        make &&\
+        make install &&\
+        mv -v /tmp/build/GMTSAR/bin /usr/local/GMTSAR/bin &&\
+        rm -rf /tmp/build &&\
+    cd / &&\
+    ### Jupyter Desktop
+    # When running a local version of this dockerfile, consult https://github.com/jupyterhub/jupyter-remote-desktop-proxy/issues/47#issuecomment-1687484891
+    cd / &&\
+        git clone https://github.com/jupyterhub/jupyter-remote-desktop-proxy.git /opt/install &&\ 
+        mv /tmp/vnc.patch /opt/install/vnc.patch &&\
+        cd /opt/install &&\
+        mamba env update -n base --file environment.yml &&\
+        patch -p1 < vnc.patch &&\
+    cd / &&\
+    ### Extra stuff
+    # Make sure that any files in the home directory are jovyan permission
+    chown -R jovyan:users $HOME/ &&\
+    # Make sure mamba (within conda) has write access
+    chmod -R 777 /opt/conda/pkgs/ &&\
+    # Add sudo group user 599 elevation
+    addgroup -gid 599 elevation &&\
+    echo '%elevation ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers &&\
+    # Use the kernel display name `base` for the base conda environment
+    mamba run -n base kernda --display-name base -o /opt/conda/share/jupyter/kernels/python3/kernel.json &&\
+    mamba clean -y --all &&\
+    mamba init &&\
+    rm -rf /home/jovyan/..?* /home/jovyan/.[!.]* /home/jovyan/*
 
-RUN mkdir -p /tmp/build && \
-    mkdir -p /usr/local/GMTSAR && \
-    git clone --branch master https://github.com/gmtsar/gmtsar /tmp/build/GMTSAR &&\
-    cd /tmp/build/GMTSAR &&\
-    autoconf &&\
-    ./configure --with-orbits-dir=/tmp CFLAGS='-z muldefs' LDFLAGS='-z muldefs'  && \
-    make &&\
-    make install &&\
-    mv -v /tmp/build/GMTSAR/bin /usr/local/GMTSAR/bin && \
-    rm -rf /tmp/build
-
+### GMTSAR
 ENV PATH=/usr/local/GMTSAR/bin:$PATH
-##################################### END PyGMTSAR #####################################
 
-# Jupyter Desktop ######################################################################
-#
-# When running a local version of this dockerfile, consult https://github.com/jupyterhub/jupyter-remote-desktop-proxy/issues/47#issuecomment-1687484891
-#
-RUN apt-get -y -q update \
-    && apt-get -y -q install \
-        flatpak \
-        patch \
-        dbus-x11 \
-        xfce4 \
-        xfce4-panel \
-        xfce4-session \
-        xfce4-settings \
-        xorg \
-        xubuntu-icon-theme \
-        tigervnc-standalone-server \
-        tigervnc-xorg-extension && \
-    mamba install --yes websockify && \
-    git clone https://github.com/jupyterhub/jupyter-remote-desktop-proxy.git /opt/install && \
-    cd /opt/install && \
-    mamba env update -n base --file environment.yml
-
-
-COPY pkgs/vnc_patches/vnc.patch /opt/install/vnc.patch
-RUN cd /opt/install && \
-    patch -p1 < vnc.patch
-
-#### END Jupyter Desktop
-
-# Install OpenSARlab's widgets and extensions
-RUN python -m pip install \
-    url-widget \
-    opensarlab-frontend==1.4.2
-
-# Make sure that any files in the home directory are jovyan permission
-RUN chown -R jovyan:users $HOME/
-
-# Add sudo group user 599 elevation
-RUN addgroup -gid 599 elevation \
-    && echo '%elevation ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
-
-# Clean up a few other things at the end
-RUN apt update && \
-    rm -rf /var/lib/apt/lists/* && \
-    apt autoremove -y && \
-    conda clean --yes --all
-
-# Make sure mamba (within conda) has write access
-RUN chmod -R 777 /opt/conda/pkgs/
-
-# Use the kernel display name `base` for the base conda environment
-RUN conda run -n base kernda --display-name base -o /opt/conda/share/jupyter/kernels/python3/kernel.json
-
-# Remove the logout option from the main menu to steer users to the hub control panel
-# Remove the launch classic notebook option to avoid broken classic terminals and image loading errors
-RUN SETTINGS=/opt/conda/share/jupyter/lab/settings && \
-    mkdir -p $SETTINGS && \
-    OVERRIDES=$SETTINGS/overrides.json && \
-    TEMP=$SETTINGS/temp && \
-    jq '. += {"@jupyterlab/mainmenu-extension:plugin": {"menus": [{"id": "jp-mainmenu-file", "items": [{"command": "hub:logout", "disabled": true}]}]}}' $OVERRIDES > $TEMP && \
-    jq '.["@jupyterlab/mainmenu-extension:plugin"].menus[1] |= {"id": "jp-mainmenu-help", "items": [{"command": "help:launch-classic-notebook", "disabled": true}]}' $TEMP > $OVERRIDES && \
-    jq '. += {"opensarlab_frontend:plugin": {"controlbtn": {"enabled": true, "rank": 1110}, "doc_link": {"enabled": true, "rank": 1100}, "gifcap_btn": {"enabled": true, "rank": 1025},"oslnotify": {"enabled": true, "note_type": "storage,calendar"}, "profile_label": {"enabled": true, "rank": 1050}}}' $OVERRIDES > $TEMP && \
-    mv $TEMP $OVERRIDES
-
-RUN rm -rf /home/jovyan/..?* /home/jovyan/.[!.]* /home/jovyan/*
 WORKDIR /home/jovyan
-RUN conda init
 USER jovyan
 
 ##########################################
