@@ -94,7 +94,7 @@ RUN mamba install -c conda-forge -y \
 RUN python3 -m pip install \
         ### For ASF
         url-widget \
-        opensarlab-frontend==1.4.4 \
+        opensarlab-frontend==1.4.5 \
         ### For pyGMTSAR
         pygmtsar &&\
     cd / &&\
@@ -133,8 +133,6 @@ RUN python3 -m pip install \
 
 ### GMTSAR
 ENV PATH=/usr/local/GMTSAR/bin:$PATH
-
-COPY ./configs/opt/conda/share/jupyter/lab/settings/overrides.json /opt/conda/share/jupyter/lab/settings/overrides.json
 
 WORKDIR /home/jovyan
 USER jovyan
