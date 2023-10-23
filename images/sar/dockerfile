@@ -6,10 +6,8 @@ WORKDIR /
 
 RUN set -ve
 
-COPY pkgs/vnc_patches/vnc.patch /tmp/vnc.patch
-COPY tests/* /tests/
 COPY TRAIN/ /usr/local/TRAIN/
-COPY ./configs/opt/conda/share/jupyter/lab/settings/overrides.json /opt/conda/share/jupyter/lab/settings/overrides.json
+COPY pkgs/vnc_patches/vnc.patch /tmp/vnc.patch
 
 RUN apt update
 RUN apt install --no-install-recommends -y \
@@ -147,6 +145,8 @@ RUN python3 -m pip install \
 ### GMTSAR
 ENV PATH=/usr/local/GMTSAR/bin:$PATH
 
+COPY ./configs/opt/conda/share/jupyter/lab/settings/overrides.json /opt/conda/share/jupyter/lab/settings/overrides.json
+
 WORKDIR /home/jovyan
 USER jovyan
 
@@ -154,4 +154,6 @@ USER jovyan
 
 FROM release as testing 
 
-RUN bash /tests/sar.sh
+COPY tests/* /tests/
+
+RUN bash /tests/*.sh
