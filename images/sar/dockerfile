@@ -94,7 +94,7 @@ RUN mamba install -c conda-forge -y \
 RUN python3 -m pip install \
         ### For ASF
         url-widget \
-        opensarlab-frontend==1.4.3 \
+        opensarlab-frontend==1.4.4 \
         ### For pyGMTSAR
         pygmtsar &&\
     cd / &&\
