@@ -6,7 +6,6 @@ WORKDIR /
 
 RUN set -ve
 
-COPY TRAIN/ /usr/local/TRAIN/
 COPY pkgs/vnc_patches/vnc.patch /tmp/vnc.patch
 
 RUN apt update
@@ -36,16 +35,6 @@ RUN apt install --no-install-recommends --fix-missing -y \
     gfortran \
     ### SNAP
     default-jdk-headless \
-    ### TRAIN 
-    gdal-bin \
-    proj-bin \
-    geotiff-bin \
-    libshp-dev \
-    libshp2 \
-    libhdf5-dev \
-    libnetcdf-dev \
-    libgdal-dev \
-    libgsl-dev \
     ### Install texlive for PDF exporting of notebooks containing LaTex
     texlive-xetex \
     texlive-fonts-recommended \
