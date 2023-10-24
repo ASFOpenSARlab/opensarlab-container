@@ -123,7 +123,8 @@ RUN python3 -m pip install \
     # Make sure mamba (within conda) has write access
     chmod -R 777 /opt/conda/pkgs/ &&\
     # Make sure JupyterLab settings is writable
-    chmod -R 775 /opt/conda/share/jupyter/lab/settings/ &&\
+    mkdir -p /opt/conda/share/jupyter/lab/settings/ &&\
+    chmod -R 755 /opt/conda/share/jupyter/lab/settings/ &&\
     # Add sudo group user 599 elevation
     addgroup -gid 599 elevation &&\
     echo '%elevation ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers &&\
