@@ -1,4 +1,4 @@
-FROM jupyter/base-notebook:lab-4.0.1 as release
+FROM jupyter/base-notebook:lab-4.0.7 as release
 
 # Base Stage ****************************************************************
 USER root
@@ -33,6 +33,16 @@ RUN apt install --no-install-recommends --fix-missing -y \
     gnupg2 \
     jq \
     gfortran \
+    make \
+    proj-bin \
+    geotiff-bin \
+    libshp-dev \
+    libshp2 \
+    libhdf5-dev \
+    libnetcdf-dev \
+    libgdal-dev \
+    libgsl-dev \
+    gdal-bin \
     ### SNAP
     default-jdk-headless \
     ### Install texlive for PDF exporting of notebooks containing LaTex
@@ -74,15 +84,18 @@ RUN mamba install -c conda-forge -y \
     bokeh \
     plotly \
     'pyopenssl>=23.0.0' \
+    zstd==1.5.5 \
+    zstandard==0.21.0 \
     ### Install jupyter libaries
     kernda \
-    # This is not compatible with JL 4: jupyter_contrib_nbextensions \ 
     jupyter-resource-usage \
     nb_conda_kernels \
     jupyterlab-spellchecker \
     ipympl \
     jupyterlab_widgets \
     ipywidgets \
+    jupyterlab-git \
+    panel \
     ### Dask
     dask-gateway \
     dask \
@@ -95,6 +108,7 @@ RUN python3 -m pip install \
         ### For ASF
         url-widget \
         opensarlab-frontend==1.4.5 \
+        jupyterlab-jupyterbook-navigation==0.1.4 \
         ### For pyGMTSAR
         pygmtsar &&\
     cd / &&\
