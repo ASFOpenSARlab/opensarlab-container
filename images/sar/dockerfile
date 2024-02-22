@@ -8,17 +8,20 @@ RUN set -ve
 
 COPY pkgs/vnc_patches/vnc.patch /tmp/vnc.patch
 
-RUN apt update
+RUN apt update --fix-missing
 RUN apt install --no-install-recommends -y \
         software-properties-common \
+        command-not-found \
         git && \
     apt-get install -y gpg-agent && \
     add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable && \
+    apt autoremove --purge snapd &&\
     apt update && \
     apt upgrade -y
 
 RUN apt install --no-install-recommends --fix-missing -y \
     ### GENERAL
+    patch \
     zip \
     unzip \
     wget \
@@ -51,6 +54,7 @@ RUN apt install --no-install-recommends --fix-missing -y \
     texlive-plain-generic \
     ### PyGMTSAR
     csh \
+    tcsh \
     autoconf \
     make \ 
     libtiff5-dev \ 
@@ -58,19 +62,7 @@ RUN apt install --no-install-recommends --fix-missing -y \
     libgmt-dev \
     gmt-dcw \
     gmt-gshhg \
-    gmt \
-    ### Jupyter Desktop
-    #flatpak \
-    patch \
-    dbus-x11 \
-    xfce4 \
-    xfce4-panel \
-    xfce4-session \
-    xfce4-settings \
-    xorg \
-    xubuntu-icon-theme \
-    tigervnc-standalone-server \
-    tigervnc-xorg-extension
+    gmt
 
 # Update conda and mamba: this breaks things in the hook, need to play with it more
 # Updating just conda and mamba will auto-remove pip, so force pip to update to remain
@@ -101,10 +93,9 @@ RUN mamba install -c conda-forge -y \
     dask-gateway \
     dask \
     distributed \
-    ### Jupyter DEsktop
-    websockify \
     --
 
+# PIP and other PACKAGES
 RUN python3 -m pip install \
         ### For ASF
         url-widget \
@@ -112,7 +103,7 @@ RUN python3 -m pip install \
         jupyterlab-jupyterbook-navigation==0.1.4 \
         ### For pyGMTSAR
         pygmtsar &&\
-    cd / &&\
+    cd /tmp &&\
         mkdir -p /tmp/build/GMTSAR /usr/local/GMTSAR &&\
         git clone --branch master https://github.com/gmtsar/gmtsar /tmp/build/GMTSAR/ &&\
         cd /tmp/build/GMTSAR &&\
@@ -122,33 +113,64 @@ RUN python3 -m pip install \
         make install &&\
         mv -v /tmp/build/GMTSAR/bin /usr/local/GMTSAR/bin &&\
         rm -rf /tmp/build &&\
-    cd / &&\
-    ### Jupyter Desktop
-    # When running a local version of this dockerfile, consult https://github.com/jupyterhub/jupyter-remote-desktop-proxy/issues/47#issuecomment-1687484891
-    cd / &&\
-        git clone https://github.com/jupyterhub/jupyter-remote-desktop-proxy.git /opt/install &&\ 
-        mv /tmp/vnc.patch /opt/install/vnc.patch &&\
-        cd /opt/install &&\
+    cd /tmp &&\
+        ### Extra stuff
+        # Make sure that any files in the home directory are jovyan permission
+        chown -R jovyan:users $HOME/ &&\
+        # Make sure mamba (within conda) has write access
+        chmod -R 777 /opt/conda/pkgs/ &&\
+        # Make sure JupyterLab settings is writable
+        mkdir -p /opt/conda/share/jupyter/lab/settings/ &&\
+        chown jovyan:users /opt/conda/share/jupyter/lab/settings/ &&\
+        chmod -R 775 /opt/conda/share/jupyter/lab/settings/ &&\
+        # Add sudo group user 599 elevation
+        addgroup -gid 599 elevation &&\
+        echo '%elevation ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers &&\
+        # Use the kernel display name `base` for the base conda environment
+        mamba run -n base kernda --display-name base -o /opt/conda/share/jupyter/kernels/python3/kernel.json &&\
+        mamba clean -y --all &&\
+        mamba init &&\
+        rm -rf /home/jovyan/..?* /home/jovyan/.[!.]* /home/jovyan/* &&\
+    rm -rf /tmp/* &&\
+    cd /tmp
+
+### Jupyter Desktop
+RUN apt install --no-install-recommends --fix-missing -y \
+        # Virtual desktop requirements
+        dbus-x11 \
+        xfce4 \
+        xfce4-panel \
+        xfce4-session \
+        xfce4-settings \
+        xorg \
+        xubuntu-icon-theme \
+        tigervnc-standalone-server \
+        tigervnc-xorg-extension \
+        # Other desktop software
+        gv \
+        gedit &&\
+    apt -y -qq remove xfce4-screensaver &&\
+    mamba install -c conda-forge -y \
+        websockify &&\
+    cd /tmp &&\
+        #### When running a local version of this dockerfile, consult https://github.com/jupyterhub/jupyter-remote-desktop-proxy/issues/47#issuecomment-1687484891
+        git clone https://github.com/jupyterhub/jupyter-remote-desktop-proxy.git /tmp/jupyter-remote-desktop-proxy &&\
+        cd /tmp/jupyter-remote-desktop-proxy &&\
+        # mv /tmp/vnc.patch /opt/install/vnc.patch &&\
+        # patch -p1 < vnc.patch &&\
         mamba env update -n base --file environment.yml &&\
-        patch -p1 < vnc.patch &&\
-    cd / &&\
-    ### Extra stuff
-    # Make sure that any files in the home directory are jovyan permission
-    chown -R jovyan:users $HOME/ &&\
-    # Make sure mamba (within conda) has write access
-    chmod -R 777 /opt/conda/pkgs/ &&\
-    # Make sure JupyterLab settings is writable
-    mkdir -p /opt/conda/share/jupyter/lab/settings/ &&\
-    chown jovyan:users /opt/conda/share/jupyter/lab/settings/ &&\
-    chmod -R 775 /opt/conda/share/jupyter/lab/settings/ &&\
-    # Add sudo group user 599 elevation
-    addgroup -gid 599 elevation &&\
-    echo '%elevation ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers &&\
-    # Use the kernel display name `base` for the base conda environment
-    mamba run -n base kernda --display-name base -o /opt/conda/share/jupyter/kernels/python3/kernel.json &&\
-    mamba clean -y --all &&\
-    mamba init &&\
-    rm -rf /home/jovyan/..?* /home/jovyan/.[!.]* /home/jovyan/*
+        . /opt/conda/bin/activate &&\
+        python -m pip install -e . &&\
+        jupyter server extension enable jupyter_remote_desktop_proxy &&\
+    cd /tmp &&\
+        #### Install a good web browser
+        echo 'deb http://download.opensuse.org/repositories/home:/stevenpusser/xUbuntu_20.04/ /' | sudo tee /etc/apt/sources.list.d/home:stevenpusser.list &&\
+        wget -O - https://download.opensuse.org/repositories/home:stevenpusser/xUbuntu_20.04/Release.key | sudo apt-key add - &&\
+        apt update --no-install-recommends &&\
+        apt install -y palemoon &&\
+        #gio mime x-scheme-handler/http palemoon.desktop &&\
+        #gio mime x-scheme-handler/https palemoon.desktop &&\
+    rm -rf /tmp/*
 
 ### GMTSAR
 ENV PATH=/usr/local/GMTSAR/bin:$PATH
