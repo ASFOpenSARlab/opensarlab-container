@@ -60,17 +60,17 @@ RUN apt install --no-install-recommends --fix-missing -y \
     gmt-gshhg \
     gmt \
     ### Jupyter Desktop
-    #flatpak \
-    patch \
-    dbus-x11 \
-    xfce4 \
-    xfce4-panel \
-    xfce4-session \
-    xfce4-settings \
-    xorg \
-    xubuntu-icon-theme \
-    tigervnc-standalone-server \
-    tigervnc-xorg-extension
+##    patch \
+##    dbus-x11 \
+##    xfce4 \
+##    xfce4-panel \
+##    xfce4-session \
+##    xfce4-settings \
+##    xorg \
+##    xubuntu-icon-theme \
+##    tigervnc-standalone-server \
+##    tigervnc-xorg-extension \
+    --
 
 # Update conda and mamba: this breaks things in the hook, need to play with it more
 # Updating just conda and mamba will auto-remove pip, so force pip to update to remain
@@ -94,15 +94,15 @@ RUN mamba install -c conda-forge -y \
     ipympl \
     jupyterlab_widgets \
     ipywidgets \
-    jupyter-ai \
+    #jupyter-ai \
     jupyterlab-git \
     panel \
     ### Dask
     dask-gateway \
     dask \
     distributed \
-    ### Jupyter DEsktop
-    websockify \
+    ### Jupyter Desktop
+##    websockify \
     --
 
 RUN python3 -m pip install \
@@ -125,13 +125,15 @@ RUN python3 -m pip install \
     cd / &&\
     ### Jupyter Desktop
     # When running a local version of this dockerfile, consult https://github.com/jupyterhub/jupyter-remote-desktop-proxy/issues/47#issuecomment-1687484891
-    cd / &&\
-        git clone https://github.com/jupyterhub/jupyter-remote-desktop-proxy.git /opt/install &&\ 
-        mv /tmp/vnc.patch /opt/install/vnc.patch &&\
-        cd /opt/install &&\
-        mamba env update -n base --file environment.yml &&\
-        patch -p1 < vnc.patch &&\
-    cd / &&\
+##    cd / &&\
+##        git clone https://github.com/jupyterhub/jupyter-remote-desktop-proxy.git /opt/install &&\
+##        mv /tmp/vnc.patch /opt/install/vnc.patch &&\
+##        cd /opt/install &&\
+##        # Due to breaking updates, for now try to find an older working commit
+##        git checkout 8d1342d9c93803c5f9c3b820dbbcaa55d3b91e01 &&\
+##        mamba env update -n base --file environment.yml &&\
+##        patch -p1 < vnc.patch &&\
+##    cd / &&\
     ### Extra stuff
     # Make sure that any files in the home directory are jovyan permission
     chown -R jovyan:users $HOME/ &&\
