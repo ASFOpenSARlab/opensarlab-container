@@ -1,0 +1,23 @@
+FROM jupyter/base-notebook:lab-4.0.7 AS release
+
+USER root
+WORKDIR /
+
+RUN set -ve
+
+RUN mamba install -c conda-forge -y \
+    dask-gateway \
+    dask=='2024.1.0' \
+    distributed=='2024.1.0' \
+    ipywidgets \
+    --
+
+COPY ./etc/gateway_access_example.ipynb /etc/singleuser/notebooks/gateway_access_example.ipynb
+
+WORKDIR /home/jovyan
+USER jovyan
+
+
+##########################################
+
+FROM release AS testing

@@ -1,0 +1,17 @@
+# https://github.com/dask/dask-docker/tree/main
+# Make sure that the python lib verions here match the minor versions of dask-gateway found in the notebook image
+FROM ghcr.io/dask/dask:2024.1.0 as release
+
+RUN apt update &&\
+    apt upgrade -y &&\
+    apt install --no-install-recommends --fix-missing -y \
+        curl &&\
+    mamba install -c conda-forge -y \
+        python=3.11.6 \
+        pandas=2.2 \
+        tornado=6.3 \
+        boto3
+
+##########################################
+
+FROM release as testing

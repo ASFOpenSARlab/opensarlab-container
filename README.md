@@ -1,5 +1,7 @@
 ## Setup Container Build in AWS
 
+** This code repo is a santized copy of the production OpenSARLab. It is not guarenteed to be current. **
+
 1. Create AWS account if needed
 
 1. Gain GitHUb access if needed

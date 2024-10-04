@@ -130,6 +130,42 @@ RUN python3 -m pip install \
 ### GMTSAR
 ENV PATH=/usr/local/GMTSAR/bin:$PATH
 
+######
+# Virtual Desktop
+RUN python3 -m pip install jupyter-remote-desktop-proxy &&\
+    mamba install -c conda-forge -y websockify
+
+RUN apt install --no-install-recommends --fix-missing -y \
+    dbus-x11 \
+    xfce4 \
+    xfce4-panel \
+    xfce4-session \
+    xfce4-settings \
+    xorg \
+    xubuntu-icon-theme \
+    tigervnc-standalone-server \
+    tigervnc-xorg-extension \
+    --
+
+# Replace Hub Control button with something more suited for an OSL lab
+RUN sed -i \
+    -e 's|if hub_control_panel_url|if LAB_SHORT_NAME|' \
+    -e 's|{{ hub_control_panel_url }}|/lab/{{ LAB_SHORT_NAME }}/hub/home|' \
+    -e 's|Hub Control Panel|Shutdown and Logout Page|' \
+    /opt/conda/lib/python3.11/site-packages/jupyter_remote_desktop_proxy/templates/index.html
+
+RUN sed -i \
+    -e 's|cd |sleep 1 \&\& cd |' \
+    /opt/conda/lib/python3.11/site-packages/jupyter_remote_desktop_proxy/share/xstartup
+
+# Install Browser
+COPY configs/mozilla-firefox.pref /etc/apt/preferences.d/mozilla-firefox
+RUN add-apt-repository ppa:mozillateam/ppa &&\
+    apt install -y firefox
+#
+# END Virtual Desktop
+####
+
 WORKDIR /home/jovyan
 USER jovyan
 

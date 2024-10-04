@@ -4,8 +4,8 @@ import sys
 
 import boto3
 
-def main(image_name, aws_region, container_namespace, aws_profile):
-    
+def main(image_name:str, aws_region:str, container_namespace:str, aws_profile):
+
     if not image_name.isalnum():
         raise ValueError(f"{image_name} is not pure alphanumeric.")
 
@@ -17,14 +17,13 @@ def main(image_name, aws_region, container_namespace, aws_profile):
 
     ecr = session.client('ecr')
 
-    repositoryName=f"{container_namespace}/{image_name}"
-
     try:
-        response = ecr.describe_repositories(repositoryNames=[repositoryName])
+        repositoryName=f"{container_namespace}/{image_name}"
+        _ = ecr.describe_repositories(repositoryNames=[repositoryName])
         print(f"Repo '{repositoryName}' already exists.")
     except ecr.exceptions.RepositoryNotFoundException as e:
         print(f"Repo for {repositoryName} not found. Creating...")
-        response = ecr.create_repository(repositoryName=repositoryName)
+        _ = ecr.create_repository(repositoryName=repositoryName)
 
 
 if __name__ == "__main__":

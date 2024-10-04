@@ -81,7 +81,7 @@ Resources:
                 docker login -u AWS -p $(aws ecr get-login-password --region ${AWS::Region}) ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com
               - export DOCKER_REGISTRY="${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ContainerNamespace}"
               - cd images;
-                for p in $(ls -d */ | cut -f1 -d/); do
+                for p in $(ls -d */ | cut -f1 -d/ | grep -v "^_"); do
                   echo "Building image '$p'";
                   python3 check_ecr.py --image_name $p --aws_region ${AWS::Region} --container_namespace ${ContainerNamespace};
                   cd $p;
