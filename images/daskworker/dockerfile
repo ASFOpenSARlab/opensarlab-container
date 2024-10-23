@@ -10,6 +10,8 @@ RUN apt update &&\
         python=3.11.6 \
         pandas=2.2 \
         tornado=6.3 \
+        xarray \
+        numpy \
         boto3
 
 ##########################################
