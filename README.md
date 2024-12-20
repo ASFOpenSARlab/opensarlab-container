@@ -1,3 +1,8 @@
+# Archive Notice
+
+This repository has been archived and is no longer in use. See [deployment-opensarlab-container](https://github.com/ASFOpenSARlab/deployment-opensarlab-container)
+for the actively maintained image currently in use in OpenSARLab.
+
 ## Setup Container Build in AWS
 
 ** This code repo is a santized copy of the production OpenSARLab. It is not guarenteed to be current. **
